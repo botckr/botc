@@ -1,10 +1,10 @@
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useState, useEffect } from 'react'
 import { useAuth } from './hooks/useAuth'
 import { STLobby } from './components/game/STLobby'
 import { PlayerLobby } from './components/game/PlayerLobby'
 import { useGameStore } from './store/gameStore'
 import { useGameData } from './hooks/useFirebaseSync'
-import { ref, get } from 'firebase/database'
+import { ref, get, onValue } from 'firebase/database'
 import { database } from './lib/firebase'
 
 // Lazy load large components
@@ -26,6 +26,16 @@ function App() {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [stPassword, setStPassword] = useState('');
   const [showSTLogin, setShowSTLogin] = useState(false);
+
+  // Pre-warm Firebase database connection
+  useEffect(() => {
+    const connectedRef = ref(database, ".info/connected");
+    const unsubscribe = onValue(connectedRef, () => {
+      // Just attaching this listener keeps the WebSocket connection alive 
+      // so that `get()` calls later are instant.
+    });
+    return () => unsubscribe();
+  }, []);
 
   const resetSession = () => {
     setRole(null);
