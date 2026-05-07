@@ -31,6 +31,15 @@ export function DayPhase({ isST }: { isST: boolean }) {
   const usedNominators = roomState.usedNominators || [];
   const usedTargets = roomState.usedTargets || [];
 
+  const butlerEntry = isST && secretState ? Object.entries(secretState.players).find(([_, p]) => (p.fakeCharacter || p.character) === 'butler') : null;
+  const butlerUid = butlerEntry?.[0];
+  const butlerSecret = butlerEntry?.[1];
+  const butlerPlayer = butlerUid ? roomState.players[butlerUid] : null;
+  const butlerVoted = butlerUid ? voters[butlerUid] === true : false;
+  const masterUid = butlerSecret?.butlerMasterUid;
+  const masterVoted = masterUid ? voters[masterUid] === true : false;
+  const isButlerVotingIllegally = butlerVoted && !masterVoted && butlerPlayer && !butlerPlayer.isDead;
+
   const handleCancelNomination = async () => {
     if (!isST || !currentNomination) return;
     const updates: Record<string, any> = {};
@@ -299,6 +308,16 @@ export function DayPhase({ isST }: { isST: boolean }) {
             </div>
           ) : (
             <div className="flex flex-col gap-3">
+               {isButlerVotingIllegally && (
+                  <div className="bg-rose-950/40 border border-rose-500/50 p-4 rounded-2xl mb-2 text-center animate-pulse">
+                     <p className="text-[11px] font-black text-rose-400 uppercase tracking-widest mb-1">⚠️ 룰 위반 경고</p>
+                     <p className="text-xs text-rose-200">
+                        집사(<span className="font-bold">{butlerPlayer?.name}</span>)가 찬성했지만, 
+                        주인(<span className="font-bold">{roomState.players[masterUid || '']?.name || '알 수 없음'}</span>)이 찬성을 취소했습니다. 
+                        집사가 스스로 투표를 취소하도록 안내해 주세요.
+                     </p>
+                  </div>
+               )}
                <Button onClick={endVoting} variant="primary" size="lg" className="w-full font-black uppercase h-16 shadow-xl border-transparent">Finalize Results</Button>
                <Button onClick={handleCancelNomination} variant="ghost" className="w-full text-xs text-slate-500 uppercase tracking-widest font-black underline underline-offset-8 decoration-slate-800">Cancel Vote</Button>
             </div>

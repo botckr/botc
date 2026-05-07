@@ -1,25 +1,27 @@
 import { memo, useState, useEffect } from 'react';
 import { getRoleName, getRoleDescription } from '../../../constants/roles';
-import type { RoleType } from '../../../types/character';
+import type { RoleType, Alignment } from '../../../types/character';
 
 interface PlayerIdentityProps {
   character: RoleType | null;
   fakeCharacter?: RoleType | null;
-  alignment: string | null;
+  alignment: Alignment | null;
   evilTeamInfo?: {
     demonName: string;
     minionNames: string[];
     bluffs: RoleType[];
   } | null;
   defaultOpen?: boolean;
+  playerName?: string;
 }
 
-export const PlayerIdentity = memo(({
-  character,
-  fakeCharacter,
-  alignment,
+export const PlayerIdentity = memo(({ 
+  character, 
+  fakeCharacter, 
+  alignment, 
   evilTeamInfo,
-  defaultOpen = false
+  defaultOpen = false,
+  playerName
 }: PlayerIdentityProps) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
@@ -72,7 +74,7 @@ export const PlayerIdentity = memo(({
                       <span className="block text-[9px] sm:text-[10px] text-slate-500 font-black uppercase mb-1">하수인(Minions)</span>
                       <span className="text-sm sm:text-base text-white font-bold leading-tight uppercase tracking-tight">{evilTeamInfo.minionNames.join(', ')}</span>
                     </div>
-                    {evilTeamInfo.bluffs.length > 0 && character === 'imp' && (
+                    {evilTeamInfo.bluffs.length > 0 && character === 'imp' && playerName === evilTeamInfo.demonName && (
                        <div className="pt-3 sm:pt-4 border-t border-rose-500/10">
                           <span className="block text-[9px] sm:text-[10px] text-slate-500 font-black uppercase mb-2 sm:mb-3 tracking-widest">악마 블러프</span>
                           <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center">

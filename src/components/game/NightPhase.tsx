@@ -21,7 +21,7 @@ export function NightPhase({ isST }: { isST: boolean }) {
 
   if (!roomState || !user || !roomId) return null;
 
-  const myRole = playerSecret?.character;
+  const myRole = playerSecret?.fakeCharacter || playerSecret?.character;
 
   const handleConfirmAction = async () => {
     const updates: Record<string, any> = {};
@@ -37,13 +37,16 @@ export function NightPhase({ isST }: { isST: boolean }) {
   if (isST) return <STNightDashboard />;
 
   const players = Object.values(roomState.players).sort((a, b) => a.seatIndex - b.seatIndex);
+  const myPlayer = roomState.players[user.uid];
   const isNight1 = roomState.dayNumber === 1;
-  const needsTarget = ['poisoner', 'ravenkeeper'].includes(myRole || '') || (myRole === 'imp' && !isNight1) || (myRole === 'monk' && !isNight1);
-  const needsTwoTargets = ['fortune_teller'].includes(myRole || '');
-  const isButler = myRole === 'butler';
+  const isDead = myPlayer?.isDead;
+
+  const needsTarget = !isDead && (['poisoner', 'ravenkeeper'].includes(myRole || '') || (myRole === 'imp' && !isNight1) || (myRole === 'monk' && !isNight1));
+  const needsTwoTargets = !isDead && ['fortune_teller'].includes(myRole || '');
+  const isButler = !isDead && myRole === 'butler';
 
   const evilNames = playerSecret?.evilTeamInfo ? [playerSecret.evilTeamInfo.demonName, ...playerSecret.evilTeamInfo.minionNames] : [];
-  
+
   const selectablePlayers = players.filter(p => {
     if (myRole === 'imp') {
       return !p.isDead;
@@ -55,18 +58,18 @@ export function NightPhase({ isST }: { isST: boolean }) {
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-lg animate-fade-in pb-20 px-0 sm:px-0">
-      
+
       {/* 1. 비밀 정보관 (Player Identity) */}
       {!isST && (
-        <PlayerIdentity 
+        <PlayerIdentity
           character={playerSecret?.character || null}
           fakeCharacter={playerSecret?.fakeCharacter}
           alignment={playerSecret?.alignment || null}
           evilTeamInfo={playerSecret?.evilTeamInfo}
           defaultOpen={isNight1}
+          playerName={myPlayer?.name}
         />
       )}
-
       {/* 2. 마을 광장 (Town Square) */}
       <TownSquare />
 
