@@ -4,7 +4,7 @@ import type { PublicRoomState, SecretRoomState } from '../types/game';
  * 악마가 사망했을 때 홍등가 여인(Scarlet Woman)이 계승할 수 있는지 체크하고 처리합니다.
  * @returns 계승 성공 여부
  */
-export function handleDemonDeath(pub: PublicRoomState, sec: SecretRoomState, isStarpass: boolean = false): boolean {
+export function handleDemonDeath(pub: PublicRoomState, sec: SecretRoomState, isStarpass: boolean = false, deadDemonUid: string): boolean {
   // 룰북: '악마가 죽기 직전' 생존자가 5명 이상일 때 홍등가 여인이 계승함
   // 이미 pub.players[targetUid].isDead = true 처리가 된 상태이므로, 
   // 방금 죽은 악마를 포함하여 생존자 수를 계산해야 합니다.
@@ -23,6 +23,7 @@ export function handleDemonDeath(pub: PublicRoomState, sec: SecretRoomState, isS
       const successorUid = sw ? sw[0] : aliveMinions[0][0];
       
       sec.players[successorUid].character = 'imp';
+      sec.players[deadDemonUid].character = 'dead_imp' as any; // 원래 임프는 죽은 임프로 처리하여 중복 방지
       return true; // 계승 성공
     }
   } else {
@@ -35,6 +36,7 @@ export function handleDemonDeath(pub: PublicRoomState, sec: SecretRoomState, isS
       if (swEntry) {
         const swUid = swEntry[0];
         sec.players[swUid].character = 'imp';
+        sec.players[deadDemonUid].character = 'dead_imp' as any; // 원래 임프는 죽은 임프로 처리
         return true; // 계승 성공
       }
     }

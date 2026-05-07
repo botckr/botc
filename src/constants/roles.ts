@@ -25,12 +25,14 @@ export const TROUBLE_BREWING_ROLES: { id: RoleType; name: string; align: Alignme
   { id: 'imp', name: '임프', align: 'evil', type: 'demon', description: '매일 밤 1명을 선택해 죽입니다. 자신을 선택해 죽고 하수인에게 악마를 넘겨줄 수 있습니다.' },
 ];
 
-export const getRoleName = (id?: RoleType | null) => {
+export const getRoleName = (id?: RoleType | string | null) => {
   if (!id) return '?';
+  if (id === 'dead_imp') return '임프(사망)';
   return TROUBLE_BREWING_ROLES.find(r => r.id === id)?.name || id;
 };
 
-export const getRoleDescription = (id?: RoleType | null) => {
+export const getRoleDescription = (id?: RoleType | string | null) => {
   if (!id) return '';
+  if (id === 'dead_imp') return '이전 악마입니다. 하수인에게 악마를 물려주었습니다.';
   return TROUBLE_BREWING_ROLES.find(r => r.id === id)?.description || '';
 };

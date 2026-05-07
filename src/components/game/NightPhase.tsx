@@ -128,7 +128,13 @@ export function NightPhase({ isST }: { isST: boolean }) {
                  </div>
               )}
               
-              <Button onClick={handleConfirmAction} variant="primary" size="lg" className="w-full h-14 sm:h-16 text-base sm:text-lg font-black uppercase tracking-widest shadow-xl border-transparent">
+              <Button 
+                 onClick={handleConfirmAction} 
+                 variant="primary" 
+                 size="lg" 
+                 className="w-full h-14 sm:h-16 text-base sm:text-lg font-black uppercase tracking-widest shadow-xl border-transparent"
+                 disabled={(needsTarget && !targetUid) || (needsTwoTargets && (!targetUid || !target2Uid)) || (isButler && !targetUid)}
+              >
                  밤 행동 확정 (Confirm)
               </Button>
            </div>

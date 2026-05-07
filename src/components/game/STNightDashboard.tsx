@@ -108,7 +108,7 @@ export function STNightDashboard() {
        const impUid = impEntry[0];
        const impAction = secretState.nightActions?.[impUid];
        const isStarpass = impAction?.targetUid === impUid;
-       handleDemonDeath(newPublicState, newSecretState, isStarpass);
+       handleDemonDeath(newPublicState, newSecretState, isStarpass, impUid);
     }
 
     const winner = checkWinCondition(newPublicState, newSecretState);
@@ -237,6 +237,8 @@ export function STNightDashboard() {
                           </span>
                        </div>
                        <div className="flex gap-1.5">
+                          {secret?.character === 'dead_imp' && <span className="text-[9px] bg-rose-950 text-rose-500 border border-rose-900/50 px-2 py-0.5 rounded-full font-black uppercase shadow-sm">구 임프</span>}
+                          {secret?.character === 'imp' && <span className="text-[9px] bg-rose-600 text-white border border-rose-500 px-2 py-0.5 rounded-full font-black uppercase shadow-sm animate-pulse">현 임프</span>}
                           {pendingPoisoned === p.uid && <span className="text-[9px] bg-purple-600/20 text-purple-400 border border-purple-600/30 px-2 py-0.5 rounded-full font-black uppercase shadow-sm animate-pulse">독</span>}
                           {secret?.isDrunk && <span className="text-[9px] bg-amber-600/20 text-amber-500 border border-amber-600/30 px-2 py-0.5 rounded-full font-black uppercase shadow-sm">취함</span>}
                           {p.isDead && p.hasGhostVote && <span className="text-[9px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-black uppercase animate-pulse">유령 표</span>}

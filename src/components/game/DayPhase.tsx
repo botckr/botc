@@ -4,7 +4,7 @@ import { database } from '../../lib/firebase';
 import { ref, update } from 'firebase/database';
 import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../ui/Button';
-import { checkWinCondition } from '../../lib/gameLogic';
+import { handleDemonDeath, checkWinCondition } from '../../lib/gameLogic';
 import { TownSquare } from './TownSquare';
 import { PlayerIdentity } from './shared/PlayerIdentity';
 import { PlayerRecords } from './shared/PlayerRecords';
@@ -56,8 +56,8 @@ export function DayPhase({ isST }: { isST: boolean }) {
     const myPlayer = roomState.players[user.uid];
     const myRole = playerSecret?.fakeCharacter || playerSecret?.character;
 
-    // Butler vote restriction (Only applies when Butler is alive)
-    if (myRole === 'butler' && !myPlayer?.isDead) {
+    // Butler vote restriction (Only applies when Butler is alive and trying to vote YES)
+    if (myRole === 'butler' && !myPlayer?.isDead && vote === true) {
        if (!playerSecret?.butlerMasterUid || voters[playerSecret.butlerMasterUid] !== true) {
           return;
        }
@@ -123,6 +123,11 @@ export function DayPhase({ isST }: { isST: boolean }) {
        pubClone.players[targetUid].isDead = true;
        pubClone.players[targetUid].hasGhostVote = true;
        pubClone.lastExecutedUid = targetUid;
+       
+       if (targetSecret?.character === 'imp') {
+          handleDemonDeath(pubClone, secClone, false, targetUid);
+       }
+
        if (targetSecret?.character === 'saint' && !targetSecret.isPoisoned && !targetSecret.isDrunk) {
           pubClone.status = 'end';
           pubClone.winner = 'evil';

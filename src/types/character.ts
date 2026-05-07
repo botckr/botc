@@ -10,7 +10,7 @@ export type RoleType =
   // Minions (하수인)
   | 'poisoner' | 'spy' | 'scarlet_woman' | 'baron'
   // Demons (악마)
-  | 'imp';
+  | 'imp' | 'dead_imp';
 
 export interface CharacterDef {
   id: RoleType;

@@ -210,7 +210,7 @@ export function TownSquare() {
               secClone.players[clickedUid].isUsed = true;
 
               if (secClone.players[selectedNominator]?.character === 'imp') {
-                 handleDemonDeath(pubClone, secClone);
+                 handleDemonDeath(pubClone, secClone, false, selectedNominator);
               }
 
               const winner = checkWinCondition(pubClone, secClone);
