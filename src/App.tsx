@@ -24,10 +24,14 @@ function App() {
 
   const { error: syncError, resetRoom } = useGameData(roomId)
   const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [stPassword, setStPassword] = useState('');
+  const [showSTLogin, setShowSTLogin] = useState(false);
 
   const resetSession = () => {
     setRole(null);
     setRoomId(null);
+    setShowSTLogin(false);
+    setStPassword('');
   };
 
   const handleGlobalReset = async () => {
@@ -37,16 +41,18 @@ function App() {
     }
   };
 
-  const handleSTLogin = async () => {
-    const pwd = window.prompt("스토리텔러 관리자 암호를 입력하세요:");
-    if (!pwd) return;
+  const handleSTLogin = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!stPassword) return;
 
     setIsAuthenticating(true);
     try {
-      const authRef = ref(database, `admin_auth/${pwd}`);
+      const authRef = ref(database, `admin_auth/${stPassword}`);
       const snapshot = await get(authRef);
       
-      if (snapshot.exists() && snapshot.val() === true) {
+      const val = snapshot.val();
+      // 지원: boolean true 또는 문자열 "true"
+      if (snapshot.exists() && (val === true || val === "true")) {
         setRole('st');
       } else {
         alert("암호가 일치하지 않거나 권한이 없습니다.");
@@ -104,14 +110,44 @@ function App() {
                   <PlayerLobby />
                 </div>
 
-                <div className="pt-6 border-t border-slate-800/30">
-                  <button 
-                    onClick={handleSTLogin}
-                    disabled={isAuthenticating}
-                    className="text-slate-600 hover:text-amber-500/80 text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 mx-auto disabled:opacity-50"
-                  >
-                    <span className="opacity-50">{isAuthenticating ? '인증 중...' : '스토리텔러 관리자 모드'}</span>
-                  </button>
+                <div className="pt-6 border-t border-slate-800/30 w-full">
+                  {!showSTLogin ? (
+                    <button 
+                      onClick={() => setShowSTLogin(true)}
+                      className="text-slate-600 hover:text-amber-500/80 text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 mx-auto"
+                    >
+                      <span className="opacity-50">스토리텔러 관리자 모드</span>
+                    </button>
+                  ) : (
+                    <form onSubmit={handleSTLogin} className="flex flex-col gap-3 animate-fade-in max-w-[240px] mx-auto">
+                      <div className="relative">
+                        <input 
+                          type="password"
+                          value={stPassword}
+                          onChange={(e) => setStPassword(e.target.value)}
+                          placeholder="ST 암호 입력"
+                          autoFocus
+                          className="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg py-2 px-3 text-xs outline-none focus:border-amber-500/50 transition-all text-center tracking-widest"
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <button 
+                          type="button"
+                          onClick={() => setShowSTLogin(false)}
+                          className="flex-1 text-[9px] font-black uppercase text-slate-500 hover:text-slate-300 transition-colors"
+                        >
+                          취소
+                        </button>
+                        <button 
+                          type="submit"
+                          disabled={isAuthenticating || !stPassword}
+                          className="flex-1 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-slate-950 text-[9px] font-black uppercase py-2 rounded-md transition-all shadow-lg shadow-amber-950/20"
+                        >
+                          {isAuthenticating ? '확인 중...' : '접속'}
+                        </button>
+                      </div>
+                    </form>
+                  )}
                 </div>
               </div>
             )}
