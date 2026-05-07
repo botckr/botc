@@ -99,9 +99,12 @@ export function GrimoireSetup() {
   const handleStartGame = async () => {
     if (!roomId || !roomState) return;
     const hasFortuneTeller = Object.values(assignedRoles).includes('fortune_teller');
-    if (hasFortuneTeller && !redHerringUid) {
-       alert("점쟁이가 있으므로 환각(거짓 악마)을 반드시 지정해야 합니다.");
-       return;
+    
+    let finalRedHerringUid = redHerringUid;
+    if (hasFortuneTeller && !finalRedHerringUid) {
+       // 악마가 아닌 플레이어 중 무작위로 한 명을 레드헤링으로 자동 지정
+       const nonDemons = orderedPlayers.filter(p => assignedRoles[p.uid] !== 'imp');
+       finalRedHerringUid = nonDemons[Math.floor(Math.random() * nonDemons.length)]?.uid;
     }
 
     setLoading(true);
@@ -136,7 +139,7 @@ export function GrimoireSetup() {
           isPoisoned: false,
           bluffs: [],
           // Mark as Red Herring if selected
-          isRedHerring: p.uid === redHerringUid
+          isRedHerring: p.uid === finalRedHerringUid
         } as any;
       });
 

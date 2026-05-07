@@ -9,7 +9,7 @@ interface GameState {
   showSpyIntel: boolean;
   
   // 액션
-  setRoomState: (state: PublicRoomState) => void;
+  setRoomState: (state: PublicRoomState | null) => void;
   setRoomId: (id: string | null) => void;
   setRole: (role: 'st' | 'player' | null) => void;
   setShowSpyIntel: (show: boolean) => void;

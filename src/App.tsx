@@ -20,7 +20,7 @@ const LoadingSpinner = () => (
 
 function App() {
   const { user, loading, error: authError } = useAuth()
-  const { roomId, roomState, role, setRole, setRoomId } = useGameStore()
+  const { roomId, roomState, role, setRole, setRoomId, setRoomState } = useGameStore()
 
   const { error: syncError, resetRoom } = useGameData(roomId)
   const [isAuthenticating, setIsAuthenticating] = useState(false);
@@ -40,6 +40,7 @@ function App() {
   const resetSession = () => {
     setRole(null);
     setRoomId(null);
+    setRoomState(null);
     setShowSTLogin(false);
     setStPassword('');
   };
