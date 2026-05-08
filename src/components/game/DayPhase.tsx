@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { usePlayerSecretData, useSecretData } from '../../hooks/useFirebaseSync';
 import { database } from '../../lib/firebase';
@@ -173,52 +174,77 @@ export function DayPhase({ isST }: { isST: boolean }) {
   };
 
   const handleSlayerShot = async (targetUid: string) => {
-    if (isST || playerSecret?.character !== 'slayer') return;
+    if (isST || playerSecret?.character !== 'slayer' || playerSecret?.isUsed) return;
     const targetName = roomState.players[targetUid].name;
-    if (window.confirm(`${targetName}님에게 학살자 능력을 사용하시겠습니까?`)) {
+    if (window.confirm(`${targetName}님에게 슬레이어 능력을 사용하시겠습니까? (이 능력은 게임 중 단 한 번만 사용 가능합니다.)`)) {
        const eventId = Date.now().toString();
        const updates: Record<string, any> = {};
        updates[`public/rooms/${roomId}/events/${eventId}`] = {
           type: 'slayer_shot',
+          actorUid: user.uid,
           actorName: roomState.players[user.uid].name,
+          targetUid: targetUid,
           targetName: targetName,
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          status: 'pending'
        };
        await update(ref(database), updates);
     }
   };
 
-  const handleResolveSlayer = async (success: boolean) => {
-    const events = roomState.events || {};
-    const lastEventId = Object.keys(events).sort().pop();
-    const lastEvent = lastEventId ? events[lastEventId] : null;
-    if (!isST || !lastEvent || !secretState) return;
-    const updates: Record<string, any> = {};
-    if (success) {
-       const targetUid = Object.keys(roomState.players).find(k => roomState.players[k].name === lastEvent.targetName);
-       if (targetUid) {
-          const pubClone = JSON.parse(JSON.stringify(roomState));
-          const secClone = JSON.parse(JSON.stringify(secretState));
-          pubClone.players[targetUid].isDead = true;
-          pubClone.players[targetUid].hasGhostVote = true;
-          
-          const winner = checkWinCondition(pubClone, secClone);
-          if (winner) {
-             pubClone.status = 'end';
-             pubClone.winner = winner;
-          }
-          
-          updates[`public/rooms/${roomId}`] = pubClone;
-          updates[`secret/rooms/${roomId}`] = secClone;
-       }
-    }
-    updates[`public/rooms/${roomId}/events/${lastEventId}`] = null;
-    await update(ref(database), updates);
-  };
+  // Removed manual handleResolveSlayer
 
   const events = roomState.events || {};
   const lastEventId = Object.keys(events).sort().pop();
   const lastEvent = lastEventId ? events[lastEventId] : null;
+
+  // ST Auto-resolve Slayer shot
+  useEffect(() => {
+    if (!isST || !secretState || !lastEventId || !lastEvent) return;
+    if (lastEvent.type === 'slayer_shot' && lastEvent.status === 'pending') {
+      const resolveSlayerAutomatically = async () => {
+        const actorUid = lastEvent.actorUid;
+        const targetUid = lastEvent.targetUid;
+        const updates: Record<string, any> = {};
+        
+        if (actorUid && targetUid) {
+           const actorSecret = secretState.players[actorUid];
+           const targetSecret = secretState.players[targetUid];
+           const pubClone = JSON.parse(JSON.stringify(roomState));
+           const secClone = JSON.parse(JSON.stringify(secretState));
+
+           // Mark as used
+           if (secClone.players[actorUid]) {
+              secClone.players[actorUid].isUsed = true;
+           }
+
+           const isMisinformed = actorSecret?.isDrunk || actorSecret?.isPoisoned;
+           const isTargetImp = targetSecret?.character === 'imp';
+
+           let success = false;
+           if (!isMisinformed && isTargetImp) {
+              success = true;
+              pubClone.players[targetUid].isDead = true;
+              pubClone.players[targetUid].hasGhostVote = true;
+              
+              const winner = checkWinCondition(pubClone, secClone);
+              if (winner) {
+                 pubClone.status = 'end';
+                 pubClone.winner = winner;
+              }
+              
+              updates[`public/rooms/${roomId}`] = pubClone;
+           }
+           
+           updates[`secret/rooms/${roomId}/players`] = secClone.players;
+           updates[`public/rooms/${roomId}/events/${lastEventId}/status`] = success ? 'dead' : 'miss';
+        }
+        await update(ref(database), updates);
+      };
+      
+      resolveSlayerAutomatically();
+    }
+  }, [isST, secretState, roomState, lastEventId, lastEvent, roomId]);
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-lg animate-fade-in pb-20 px-0 sm:px-0">
@@ -235,11 +261,12 @@ export function DayPhase({ isST }: { isST: boolean }) {
       <TownSquare />
 
       {isST && lastEvent && lastEvent.type === 'slayer_shot' && (Date.now() - lastEvent.timestamp < 60000) && (
-        <div className="bg-rose-600 text-white p-8 rounded-[2.5rem] shadow-2xl animate-bounce text-center space-y-4">
-           <div><p className="text-[10px] font-black uppercase opacity-80 mb-2 tracking-widest">Slayer Shot Alert</p><p className="text-2xl font-black">{lastEvent.actorName} {'->'} {lastEvent.targetName}</p></div>
+        <div className="bg-rose-600 text-white p-8 rounded-[2.5rem] shadow-2xl animate-bounce text-center space-y-4 mx-4 sm:mx-0">
+           <div><p className="text-[10px] font-black uppercase opacity-80 mb-2 tracking-widest">Slayer Shot Result</p><p className="text-2xl font-black">{lastEvent.actorName} {'->'} {lastEvent.targetName}</p></div>
            <div className="flex gap-3">
-              <Button onClick={() => handleResolveSlayer(true)} variant="primary" className="flex-1 bg-white text-rose-600 font-black h-16">DEAD</Button>
-              <Button onClick={() => handleResolveSlayer(false)} variant="secondary" className="flex-1 bg-rose-900 text-white border-transparent h-16">MISS</Button>
+              {lastEvent.status === 'dead' && <div className="flex-1 bg-white text-rose-600 font-black h-16 flex items-center justify-center rounded-xl text-xl">DEAD</div>}
+              {lastEvent.status === 'miss' && <div className="flex-1 bg-rose-900 text-white font-black h-16 flex items-center justify-center rounded-xl text-xl">MISS</div>}
+              {lastEvent.status === 'pending' && <div className="flex-1 bg-rose-800 text-white font-black h-16 flex items-center justify-center rounded-xl text-xl animate-pulse">EVALUATING...</div>}
            </div>
         </div>
       )}

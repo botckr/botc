@@ -29,9 +29,12 @@ export interface NominationRecord {
 
 export interface GameEvent {
   type: 'slayer_shot' | 'nomination' | 'execution';
+  actorUid?: string;
   actorName: string;
+  targetUid?: string;
   targetName: string;
   timestamp: number;
+  status?: 'pending' | 'dead' | 'miss';
 }
 
 export interface PublicRoomState {

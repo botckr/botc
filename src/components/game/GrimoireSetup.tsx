@@ -16,7 +16,7 @@ const TROUBLE_BREWING_ROLES: { id: RoleType; name: string; align: Alignment; typ
   { id: 'monk', name: '수도승', align: 'good', type: 'townsfolk' },
   { id: 'ravenkeeper', name: '까마귀사육사', align: 'good', type: 'townsfolk' },
   { id: 'virgin', name: '처녀', align: 'good', type: 'townsfolk' },
-  { id: 'slayer', name: '학살자', align: 'good', type: 'townsfolk' },
+  { id: 'slayer', name: '슬레이어', align: 'good', type: 'townsfolk' },
   { id: 'soldier', name: '군인', align: 'good', type: 'townsfolk' },
   { id: 'mayor', name: '시장', align: 'good', type: 'townsfolk' },
   { id: 'butler', name: '집사', align: 'good', type: 'outsider' },

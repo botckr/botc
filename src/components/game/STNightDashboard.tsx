@@ -154,7 +154,7 @@ export function STNightDashboard() {
                const action = actions[p.uid];
                const role = secretState.players[p.uid]?.character;
                const isNight1 = roomState.dayNumber === 1;
-               const needsTarget = ['poisoner', 'ravenkeeper'].includes(role || '') || (role === 'imp' && !isNight1) || (role === 'monk' && !isNight1);
+               const needsTarget = ['poisoner'].includes(role || '') || (role === 'ravenkeeper' && !isNight1) || (role === 'imp' && !isNight1) || (role === 'monk' && !isNight1);
                const needsTwoTargets = ['fortune_teller'].includes(role || '');
                const isButler = role === 'butler';
 
