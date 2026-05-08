@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { usePlayerSecretData, useSecretData } from '../../hooks/useFirebaseSync';
 import { database } from '../../lib/firebase';
@@ -20,53 +19,45 @@ export function DayPhase({ isST }: { isST: boolean }) {
   const lastEventId = Object.keys(events).sort().pop();
   const lastEvent = lastEventId ? events[lastEventId] : null;
 
-  // ST Auto-resolve Slayer shot
-  useEffect(() => {
-    if (!isST || !secretState || !lastEventId || !lastEvent) return;
-    if (lastEvent.type === 'slayer_shot' && lastEvent.status === 'pending') {
-      const resolveSlayerAutomatically = async () => {
-        const actorUid = lastEvent.actorUid;
-        const targetUid = lastEvent.targetUid;
-        const updates: Record<string, any> = {};
-        
-        if (actorUid && targetUid && secretState?.players) {
-           const actorSecret = secretState.players[actorUid];
-           const targetSecret = secretState.players[targetUid];
-           const pubClone = JSON.parse(JSON.stringify(roomState));
-           const secClone = JSON.parse(JSON.stringify(secretState));
+  const handleResolveSlayer = async (eventId: string, event: any) => {
+    if (!isST || !secretState) return;
+    const actorUid = event.actorUid;
+    const targetUid = event.targetUid;
+    const updates: Record<string, any> = {};
+    
+    if (actorUid && targetUid && secretState?.players) {
+       const actorSecret = secretState.players[actorUid];
+       const targetSecret = secretState.players[targetUid];
+       const pubClone = JSON.parse(JSON.stringify(roomState));
+       const secClone = JSON.parse(JSON.stringify(secretState));
 
-           // Mark as used
-           if (secClone.players[actorUid]) {
-              secClone.players[actorUid].isUsed = true;
-           }
+       if (secClone.players[actorUid]) {
+          secClone.players[actorUid].isUsed = true;
+       }
 
-           const isMisinformed = actorSecret?.isDrunk || actorSecret?.isPoisoned;
-           const isTargetImp = targetSecret?.character === 'imp';
+       const isMisinformed = actorSecret?.isDrunk || actorSecret?.isPoisoned;
+       const isTargetImp = targetSecret?.character === 'imp';
 
-           let success = false;
-           if (!isMisinformed && isTargetImp) {
-              success = true;
-              pubClone.players[targetUid].isDead = true;
-              pubClone.players[targetUid].hasGhostVote = true;
-              
-              const winner = checkWinCondition(pubClone, secClone);
-              if (winner) {
-                 pubClone.status = 'end';
-                 pubClone.winner = winner;
-              }
-              
-              updates[`public/rooms/${roomId}`] = pubClone;
-           }
-           
-           updates[`secret/rooms/${roomId}/players`] = secClone.players;
-           updates[`public/rooms/${roomId}/events/${lastEventId}/status`] = success ? 'dead' : 'miss';
-        }
-        await update(ref(database), updates);
-      };
-      
-      resolveSlayerAutomatically();
+       let success = false;
+       if (!isMisinformed && isTargetImp) {
+          success = true;
+          pubClone.players[targetUid].isDead = true;
+          pubClone.players[targetUid].hasGhostVote = true;
+          
+          const winner = checkWinCondition(pubClone, secClone);
+          if (winner) {
+             pubClone.status = 'end';
+             pubClone.winner = winner;
+          }
+          
+          updates[`public/rooms/${roomId}`] = pubClone;
+       }
+       
+       updates[`secret/rooms/${roomId}/players`] = secClone.players;
+       updates[`public/rooms/${roomId}/events/${eventId}/status`] = success ? 'dead' : 'miss';
     }
-  }, [isST, secretState, roomState, lastEventId, lastEvent, roomId]);
+    await update(ref(database), updates);
+  };
 
   if (!roomState || !user || !roomId) return null;
 
@@ -225,8 +216,10 @@ export function DayPhase({ isST }: { isST: boolean }) {
     await update(ref(database), updates);
   };
 
+  const hasPendingSlayerShot = Object.values(events).some((e: any) => e.type === 'slayer_shot' && e.actorUid === user.uid && e.status === 'pending');
+
   const handleSlayerShot = async (targetUid: string) => {
-    if (isST || playerSecret?.character !== 'slayer' || playerSecret?.isUsed) return;
+    if (isST || playerSecret?.character !== 'slayer' || playerSecret?.isUsed || hasPendingSlayerShot) return;
     const targetName = roomState.players[targetUid].name;
     if (window.confirm(`${targetName}님에게 슬레이어 능력을 사용하시겠습니까? (이 능력은 게임 중 단 한 번만 사용 가능합니다.)`)) {
        const eventId = Date.now().toString();
@@ -266,7 +259,9 @@ export function DayPhase({ isST }: { isST: boolean }) {
            <div className="flex gap-3">
               {lastEvent.status === 'dead' && <div className="flex-1 bg-white text-rose-600 font-black h-16 flex items-center justify-center rounded-xl text-xl">DEAD</div>}
               {lastEvent.status === 'miss' && <div className="flex-1 bg-rose-900 text-white font-black h-16 flex items-center justify-center rounded-xl text-xl">MISS</div>}
-              {lastEvent.status === 'pending' && <div className="flex-1 bg-rose-800 text-white font-black h-16 flex items-center justify-center rounded-xl text-xl animate-pulse">EVALUATING...</div>}
+              {lastEvent.status === 'pending' && lastEventId && (
+                 <Button onClick={() => handleResolveSlayer(lastEventId, lastEvent)} variant="primary" className="flex-1 bg-slate-950 text-white border-transparent h-16 font-black tracking-widest">판독 결과 확인 (Confirm)</Button>
+              )}
            </div>
         </div>
       )}
@@ -360,7 +355,7 @@ export function DayPhase({ isST }: { isST: boolean }) {
       )}
 
       {/* Slayer Shot */}
-      {!isST && playerSecret?.character === 'slayer' && !roomState.players[user.uid]?.isDead && (
+      {!isST && playerSecret?.character === 'slayer' && !roomState.players[user.uid]?.isDead && !playerSecret?.isUsed && !hasPendingSlayerShot && (
          <div className="bg-rose-950/30 p-8 rounded-[3rem] border border-rose-500/30 text-center shadow-2xl mt-4 space-y-6 relative overflow-hidden mx-4 sm:mx-0">
             <div className="absolute top-0 left-0 w-full h-1 bg-rose-500/20 animate-pulse"></div>
             <p className="text-sm text-rose-500 font-black uppercase tracking-[0.4em] mb-2">Execute Slayer's Shot</p>
