@@ -16,6 +16,58 @@ export function DayPhase({ isST }: { isST: boolean }) {
   const { playerSecret } = usePlayerSecretData(roomId, user?.uid || null);
   const { secretState } = useSecretData(roomId, isST);
 
+  const events = roomState?.events || {};
+  const lastEventId = Object.keys(events).sort().pop();
+  const lastEvent = lastEventId ? events[lastEventId] : null;
+
+  // ST Auto-resolve Slayer shot
+  useEffect(() => {
+    if (!isST || !secretState || !lastEventId || !lastEvent) return;
+    if (lastEvent.type === 'slayer_shot' && lastEvent.status === 'pending') {
+      const resolveSlayerAutomatically = async () => {
+        const actorUid = lastEvent.actorUid;
+        const targetUid = lastEvent.targetUid;
+        const updates: Record<string, any> = {};
+        
+        if (actorUid && targetUid && secretState?.players) {
+           const actorSecret = secretState.players[actorUid];
+           const targetSecret = secretState.players[targetUid];
+           const pubClone = JSON.parse(JSON.stringify(roomState));
+           const secClone = JSON.parse(JSON.stringify(secretState));
+
+           // Mark as used
+           if (secClone.players[actorUid]) {
+              secClone.players[actorUid].isUsed = true;
+           }
+
+           const isMisinformed = actorSecret?.isDrunk || actorSecret?.isPoisoned;
+           const isTargetImp = targetSecret?.character === 'imp';
+
+           let success = false;
+           if (!isMisinformed && isTargetImp) {
+              success = true;
+              pubClone.players[targetUid].isDead = true;
+              pubClone.players[targetUid].hasGhostVote = true;
+              
+              const winner = checkWinCondition(pubClone, secClone);
+              if (winner) {
+                 pubClone.status = 'end';
+                 pubClone.winner = winner;
+              }
+              
+              updates[`public/rooms/${roomId}`] = pubClone;
+           }
+           
+           updates[`secret/rooms/${roomId}/players`] = secClone.players;
+           updates[`public/rooms/${roomId}/events/${lastEventId}/status`] = success ? 'dead' : 'miss';
+        }
+        await update(ref(database), updates);
+      };
+      
+      resolveSlayerAutomatically();
+    }
+  }, [isST, secretState, roomState, lastEventId, lastEvent, roomId]);
+
   if (!roomState || !user || !roomId) return null;
 
   const players = Object.values(roomState.players).sort((a, b) => a.seatIndex - b.seatIndex);
@@ -193,58 +245,6 @@ export function DayPhase({ isST }: { isST: boolean }) {
   };
 
   // Removed manual handleResolveSlayer
-
-  const events = roomState.events || {};
-  const lastEventId = Object.keys(events).sort().pop();
-  const lastEvent = lastEventId ? events[lastEventId] : null;
-
-  // ST Auto-resolve Slayer shot
-  useEffect(() => {
-    if (!isST || !secretState || !lastEventId || !lastEvent) return;
-    if (lastEvent.type === 'slayer_shot' && lastEvent.status === 'pending') {
-      const resolveSlayerAutomatically = async () => {
-        const actorUid = lastEvent.actorUid;
-        const targetUid = lastEvent.targetUid;
-        const updates: Record<string, any> = {};
-        
-        if (actorUid && targetUid && secretState?.players) {
-           const actorSecret = secretState.players[actorUid];
-           const targetSecret = secretState.players[targetUid];
-           const pubClone = JSON.parse(JSON.stringify(roomState));
-           const secClone = JSON.parse(JSON.stringify(secretState));
-
-           // Mark as used
-           if (secClone.players[actorUid]) {
-              secClone.players[actorUid].isUsed = true;
-           }
-
-           const isMisinformed = actorSecret?.isDrunk || actorSecret?.isPoisoned;
-           const isTargetImp = targetSecret?.character === 'imp';
-
-           let success = false;
-           if (!isMisinformed && isTargetImp) {
-              success = true;
-              pubClone.players[targetUid].isDead = true;
-              pubClone.players[targetUid].hasGhostVote = true;
-              
-              const winner = checkWinCondition(pubClone, secClone);
-              if (winner) {
-                 pubClone.status = 'end';
-                 pubClone.winner = winner;
-              }
-              
-              updates[`public/rooms/${roomId}`] = pubClone;
-           }
-           
-           updates[`secret/rooms/${roomId}/players`] = secClone.players;
-           updates[`public/rooms/${roomId}/events/${lastEventId}/status`] = success ? 'dead' : 'miss';
-        }
-        await update(ref(database), updates);
-      };
-      
-      resolveSlayerAutomatically();
-    }
-  }, [isST, secretState, roomState, lastEventId, lastEvent, roomId]);
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-lg animate-fade-in pb-20 px-0 sm:px-0">
