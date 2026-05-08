@@ -323,8 +323,10 @@ export function DayPhase({ isST }: { isST: boolean }) {
                      </p>
                   </div>
                )}
-               <Button onClick={endVoting} variant="primary" size="lg" className="w-full font-black uppercase h-16 shadow-xl border-transparent">Finalize Results</Button>
-               <Button onClick={handleCancelNomination} variant="ghost" className="w-full text-xs text-slate-500 uppercase tracking-widest font-black underline underline-offset-8 decoration-slate-800">Cancel Vote</Button>
+               <div className="flex flex-col gap-3">
+                  <Button onClick={endVoting} variant="primary" size="lg" className="w-full font-black uppercase h-16 shadow-xl border-transparent">투표 결과 확정</Button>
+                  <Button onClick={handleCancelNomination} variant="ghost" className="w-full text-xs text-slate-500 uppercase tracking-widest font-black underline underline-offset-8 decoration-slate-800">투표 취소 및 돌아가기</Button>
+               </div>
             </div>
           )}
         </div>

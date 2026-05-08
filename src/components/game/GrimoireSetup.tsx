@@ -240,8 +240,8 @@ export function GrimoireSetup() {
         </div>
 
         <div className="flex gap-2 mb-6">
-          <Button variant="secondary" size="sm" onClick={handleRandomSeats} className="flex-1 text-[10px] font-black uppercase">Shuffle Seats</Button>
-          <Button variant="secondary" size="sm" onClick={handleRandomRoles} className="flex-1 text-[10px] font-black uppercase">Random Roles</Button>
+          <Button variant="secondary" size="sm" onClick={handleRandomSeats} className="flex-1 text-[10px] font-black uppercase">자리 섞기</Button>
+          <Button variant="secondary" size="sm" onClick={handleRandomRoles} className="flex-1 text-[10px] font-black uppercase">역할 무작위 배정</Button>
         </div>
 
         {hasFortuneTeller && (

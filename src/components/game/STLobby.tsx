@@ -60,7 +60,7 @@ export function STLobby() {
   if (!roomId) {
     return (
       <div className="flex flex-col items-center gap-6 animate-fade-in w-full">
-        <h2 className="text-xl font-bold text-slate-300">스토리텔러 (ST) 모드</h2>
+        <h2 className="text-xl font-bold text-slate-300">스토리텔러 모드</h2>
         <Button
           onClick={handleCreateRoom}
           disabled={loading || !user}

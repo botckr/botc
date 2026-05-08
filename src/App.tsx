@@ -87,7 +87,7 @@ function App() {
         <div className="bg-slate-900 p-6 sm:p-8 rounded-2xl shadow-2xl w-full flex flex-col items-center border border-slate-800/80 backdrop-blur-sm relative overflow-hidden">
           {!gameStarted && (
             <h1 className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-sky-400 to-sky-600 mb-8 text-center tracking-tighter drop-shadow-sm uppercase">
-              BotC Digital Grimmoire
+              시계탑에 흐른 피
             </h1>
           )}
           
@@ -136,7 +136,7 @@ function App() {
                           type="password"
                           value={stPassword}
                           onChange={(e) => setStPassword(e.target.value)}
-                          placeholder="ST 암호 입력"
+                          placeholder="스토리텔러 암호 입력"
                           autoFocus
                           className="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg py-2 px-3 text-xs outline-none focus:border-amber-500/50 transition-all text-center tracking-widest"
                         />
