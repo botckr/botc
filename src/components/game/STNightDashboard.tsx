@@ -237,7 +237,10 @@ export function STNightDashboard() {
                           <div className={cn("w-2 h-2 rounded-full shadow-sm", p.isDead ? "bg-slate-700" : "bg-emerald-500 shadow-emerald-500/20")}></div>
                           <span className="text-sm font-black text-slate-200">
                              {p.name} 
-                             <span className="text-xs text-slate-500 font-bold ml-2 tracking-widest">({getRoleName(secret?.character)})</span>
+                             <span className="text-xs text-slate-500 font-bold ml-2 tracking-widest">
+                               ({getRoleName(secret?.character)})
+                               {secret?.character === 'drunk' && secret?.fakeCharacter && ` -> (${getRoleName(secret.fakeCharacter)})`}
+                             </span>
                           </span>
                        </div>
                        <div className="flex gap-1.5">

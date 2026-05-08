@@ -32,7 +32,7 @@ export function DayPhase({ isST }: { isST: boolean }) {
   const usedNominators = roomState.usedNominators || [];
   const usedTargets = roomState.usedTargets || [];
 
-  const butlerEntry = isST && secretState ? Object.entries(secretState.players).find(([_, p]) => (p.fakeCharacter || p.character) === 'butler') : null;
+  const butlerEntry = isST && secretState?.players ? Object.entries(secretState.players).find(([_, p]) => (p.fakeCharacter || p.character) === 'butler') : null;
   const butlerUid = butlerEntry?.[0];
   const butlerSecret = butlerEntry?.[1];
   const butlerPlayer = butlerUid ? roomState.players[butlerUid] : null;
@@ -207,7 +207,7 @@ export function DayPhase({ isST }: { isST: boolean }) {
         const targetUid = lastEvent.targetUid;
         const updates: Record<string, any> = {};
         
-        if (actorUid && targetUid) {
+        if (actorUid && targetUid && secretState?.players) {
            const actorSecret = secretState.players[actorUid];
            const targetSecret = secretState.players[targetUid];
            const pubClone = JSON.parse(JSON.stringify(roomState));
@@ -393,7 +393,7 @@ export function DayPhase({ isST }: { isST: boolean }) {
                     <div className="pt-3 border-t border-slate-900/50 flex justify-between items-center">
                        <div className="flex flex-col">
                           <span className="text-xs text-slate-600 font-black uppercase mb-1">찬성 수 ({record.yesCount})</span>
-                          <p className="text-xs text-slate-500 italic max-w-[200px] truncate">{record.voterNames.join(', ') || '없음'}</p>
+                          <p className="text-xs text-slate-500 italic max-w-[200px] truncate">{(record.voterNames || []).join(', ') || '없음'}</p>
                        </div>
                        {record.yesCount >= majorityNeeded && (
                           <span className="text-xs bg-rose-900/30 text-rose-500 border border-rose-900/50 px-2 py-0.5 rounded-full font-black uppercase tracking-tighter">처형 위기</span>

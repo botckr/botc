@@ -107,6 +107,9 @@ const PlayerToken = memo(({
                secret?.alignment === 'evil' ? "text-rose-500/90" : "text-sky-400/90"
              )}>
                {getRoleName(secret?.character)}
+               {secret?.character === 'drunk' && secret?.fakeCharacter && (
+                 <span className="text-[10px] text-amber-500 ml-1">({getRoleName(secret.fakeCharacter)})</span>
+               )}
              </span>
              
              <div className="flex gap-1 mt-1 flex-wrap justify-center">
