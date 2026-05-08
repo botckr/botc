@@ -47,13 +47,17 @@ export function STNightDashboard() {
 
   const generateAutoSuggestions = useCallback(() => {
      if (!roomState || !secretState) return;
-     const suggestions = getNightSuggestions(roomState, secretState);
+     const simPubState = JSON.parse(JSON.stringify(roomState));
+     pendingDeaths.forEach(uid => {
+        if (simPubState.players[uid]) simPubState.players[uid].isDead = true;
+     });
+     const suggestions = getNightSuggestions(roomState, secretState, simPubState);
      const newEdits: Record<string, string> = { ...editedSuggestions };
      Object.entries(suggestions).forEach(([uid, res]) => {
         newEdits[uid] = res.message;
      });
      setEditedSuggestions(newEdits);
-  }, [roomState, secretState, editedSuggestions]);
+  }, [roomState, secretState, editedSuggestions, pendingDeaths]);
 
   const toggleDeath = useCallback((uid: string) => {
     setPendingDeaths(prev => 

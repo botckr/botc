@@ -8,7 +8,7 @@ const isEvil = (alignment: string | null) => alignment === 'evil';
 /**
  * Trouble Brewing 정보 직업들에 대한 오정보/진실 정보를 생성하는 핵심 엔진
  */
-export function getNightSuggestions(publicState: PublicRoomState, secretState: SecretRoomState) {
+export function getNightSuggestions(publicState: PublicRoomState, secretState: SecretRoomState, newPublicState: PublicRoomState = publicState) {
   const suggestions: Record<string, { message: string }> = {};
   const { players: secretPlayers, evilInfo } = secretState;
   const { players: pubPlayers, dayNumber, lastExecutedUid } = publicState;
@@ -106,6 +106,21 @@ export function getNightSuggestions(publicState: PublicRoomState, secretState: S
           suggestions[uid] = { message: (isMisinformed ? !realAnswer : realAnswer) ? 'Yes' : 'No' };
         }
         break;
+
+      case 'ravenkeeper': {
+        const wasAlive = !publicState.players[uid]?.isDead;
+        const isDeadNow = newPublicState.players[uid]?.isDead;
+        if (wasAlive && isDeadNow) {
+           const rAction = secretState.nightActions?.[uid];
+           if (rAction?.targetUid) {
+              const targetCharacter = secretPlayers[rAction.targetUid]?.character;
+              const fakeRoles: RoleType[] = ['imp', 'poisoner', 'fortune_teller', 'mayor'];
+              const charName = isMisinformed ? getRoleName(fakeRoles[Math.floor(Math.random() * fakeRoles.length)]) : getRoleName(targetCharacter);
+              suggestions[uid] = { message: `당신이 밤에 사망하여 선택한 자의 정체를 확인합니다: ${charName}` };
+           }
+        }
+        break;
+      }
         
       case 'butler':
         const butlerAction = secretState.nightActions?.[uid];
@@ -174,7 +189,7 @@ export function resolveNightActions(publicState: PublicRoomState, secretState: S
 
   // 3. 악마 계승 및 승리 조건 체크는 STNightDashboard.tsx에서 ST가 사망자를 확정한 후에 수행하도록 위임합니다.
 
-  const suggestions = getNightSuggestions(publicState, secretState);
+  const suggestions = getNightSuggestions(publicState, secretState, newPublicState);
   newSecretState.nightResults = { ...(newSecretState.nightResults || {}), ...suggestions };
 
   newSecretState.nightActions = {};
