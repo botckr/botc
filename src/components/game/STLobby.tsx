@@ -84,7 +84,7 @@ export function STLobby() {
       <div className="bg-slate-950 p-6 rounded-xl border border-slate-800 text-center relative overflow-hidden">
         <div className="absolute -top-10 -right-10 w-32 h-32 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <p className="text-sm text-slate-400 mb-2 relative z-10">참여 코드</p>
-        <h1 className="text-5xl sm:text-6xl font-mono tracking-widest text-sky-400 font-bold relative z-10 drop-shadow-[0_0_8px_rgba(14,165,233,0.3)]">{roomId}</h1>
+        <h1 className="text-4xl sm:text-4xl font-mono tracking-widest text-sky-400 font-bold relative z-10 drop-shadow-[0_0_8px_rgba(14,165,233,0.3)]">{roomId}</h1>
       </div>
 
       <div className="bg-slate-900/50 rounded-xl p-4 border border-slate-800/80 backdrop-blur">

@@ -14,7 +14,7 @@ const NightPhase = lazy(() => import('./components/game/NightPhase').then(m => (
 const LoadingSpinner = () => (
   <div className="flex flex-col items-center justify-center py-20 gap-4 animate-fade-in">
     <div className="w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
-    <p className="text-sky-400 font-medium tracking-wide animate-pulse uppercase tracking-widest text-[10px]">Loading Phase...</p>
+    <p className="text-sky-400 font-medium tracking-wide animate-pulse uppercase tracking-widest text-xs">Loading Phase...</p>
   </div>
 );
 
@@ -102,8 +102,8 @@ function App() {
             {(authError || syncError) && (
               <div className="p-4 bg-rose-500/10 border border-rose-500/30 rounded-xl mb-4 shadow-inner">
                 <p className="text-rose-500 text-xs font-bold uppercase tracking-tight mb-2">동기화 연결 끊김</p>
-                <p className="text-[11px] text-slate-400 mb-4">{authError?.message || syncError?.message}</p>
-                <button onClick={resetSession} className="text-[10px] font-black text-rose-400 uppercase tracking-widest border border-rose-500/30 px-3 py-1.5 rounded-lg hover:bg-rose-500/10 transition-all">세션 강제 초기화</button>
+                <p className="text-sm text-slate-400 mb-4">{authError?.message || syncError?.message}</p>
+                <button onClick={resetSession} className="text-xs font-black text-rose-400 uppercase tracking-widest border border-rose-500/30 px-3 py-1.5 rounded-lg hover:bg-rose-500/10 transition-all">세션 강제 초기화</button>
               </div>
             )}
             
@@ -111,7 +111,7 @@ function App() {
                <div className="flex flex-col items-center justify-center py-20 gap-4 animate-fade-in">
                   <div className="w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
                   <p className="text-sky-400 font-medium tracking-wide animate-pulse">마도서 기록 복구 중...</p>
-                  <button onClick={resetSession} className="text-sm text-slate-400 underline mt-6 hover:text-white transition-colors uppercase tracking-widest text-[10px] font-black">기록 삭제하고 처음으로</button>
+                  <button onClick={resetSession} className="text-sm text-slate-400 underline mt-6 hover:text-white transition-colors uppercase tracking-widest text-xs font-black">기록 삭제하고 처음으로</button>
                </div>
             )}
 
@@ -125,7 +125,7 @@ function App() {
                   {!showSTLogin ? (
                     <button 
                       onClick={() => setShowSTLogin(true)}
-                      className="text-slate-600 hover:text-amber-500/80 text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 mx-auto"
+                      className="text-slate-600 hover:text-amber-500/80 text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 mx-auto"
                     >
                       <span className="opacity-50">스토리텔러 관리자 모드</span>
                     </button>
@@ -145,14 +145,14 @@ function App() {
                         <button 
                           type="button"
                           onClick={() => setShowSTLogin(false)}
-                          className="flex-1 text-[9px] font-black uppercase text-slate-500 hover:text-slate-300 transition-colors"
+                          className="flex-1 text-xs font-black uppercase text-slate-500 hover:text-slate-300 transition-colors"
                         >
                           취소
                         </button>
                         <button 
                           type="submit"
                           disabled={isAuthenticating || !stPassword}
-                          className="flex-1 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-slate-950 text-[9px] font-black uppercase py-2 rounded-md transition-all shadow-lg shadow-amber-950/20"
+                          className="flex-1 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-slate-950 text-xs font-black uppercase py-2 rounded-md transition-all shadow-lg shadow-amber-950/20"
                         >
                           {isAuthenticating ? '확인 중...' : '접속'}
                         </button>
@@ -175,7 +175,7 @@ function App() {
           {role && (!roomState || roomState.status === 'lobby' || roomState.status === 'setup') && (
             <button 
               onClick={resetSession}
-              className="mt-6 text-slate-600 text-[9px] font-black uppercase tracking-widest hover:text-slate-300 transition-colors flex items-center gap-1.5"
+              className="mt-6 text-slate-600 text-xs font-black uppercase tracking-widest hover:text-slate-300 transition-colors flex items-center gap-1.5"
             >
               <span>←</span> 역할 변경
             </button>
@@ -189,10 +189,10 @@ function App() {
            <div className={`m-auto bg-slate-900 border-2 p-8 sm:p-10 rounded-[2.5rem] shadow-2xl text-center max-w-sm w-full space-y-8 relative overflow-hidden ${roomState.winner === 'good' ? "border-sky-500/50 shadow-sky-500/20" : "border-rose-600/50 shadow-rose-600/20"}`}>
               
               <div className="flex flex-col items-center justify-center space-y-3">
-                 <h2 className={`text-4xl sm:text-5xl font-black uppercase tracking-tighter italic leading-none ${roomState.winner === 'good' ? "text-sky-400" : "text-rose-500"}`}>
+                 <h2 className={`text-4xl sm:text-4xl font-black uppercase tracking-tighter italic leading-none ${roomState.winner === 'good' ? "text-sky-400" : "text-rose-500"}`}>
                    {roomState.winner === 'good' ? '선의 승리' : '악의 승리'}
                  </h2>
-                 <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em]">게임 종료</p>
+                 <p className="text-slate-400 text-xs font-black uppercase tracking-[0.3em]">게임 종료</p>
               </div>
 
               <div className="py-8 bg-slate-950/80 rounded-[2rem] border border-slate-800 shadow-inner px-5">
@@ -217,7 +217,7 @@ function App() {
       {role === 'st' && roomId && (
         <button 
           onClick={handleGlobalReset}
-          className="fixed bottom-4 right-4 bg-rose-950/40 hover:bg-rose-600 text-rose-500 hover:text-white border border-rose-500/30 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all z-[100] backdrop-blur"
+          className="fixed bottom-4 right-4 bg-rose-950/40 hover:bg-rose-600 text-rose-500 hover:text-white border border-rose-500/30 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all z-[100] backdrop-blur"
         >
           방 전체 초기화
         </button>

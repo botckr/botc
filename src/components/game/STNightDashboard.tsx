@@ -148,7 +148,7 @@ export function STNightDashboard() {
       {/* 1. 행동 모니터링 Section */}
       <section className="bg-slate-900/90 p-8 rounded-[2.5rem] border border-slate-800 shadow-2xl relative overflow-hidden">
          <div className="absolute top-0 right-0 w-32 h-32 bg-sky-500/5 blur-3xl pointer-events-none"></div>
-         <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mb-8 border-b border-slate-800/50 pb-4">실시간 밤 행동 요약</h3>
+         <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.4em] mb-8 border-b border-slate-800/50 pb-4">실시간 밤 행동 요약</h3>
          <div className="grid grid-cols-1 gap-4">
             {players.filter(p => !p.isDead).map(p => {
                const action = actions[p.uid];
@@ -163,19 +163,19 @@ export function STNightDashboard() {
                return (
                  <div key={p.uid} className="flex justify-between items-center bg-slate-950/60 p-4 rounded-2xl border border-slate-800/50 shadow-inner group">
                     <div className="flex flex-col">
-                       <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{getRoleName(role)}</span>
+                       <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">{getRoleName(role)}</span>
                        <span className="text-sm font-black text-slate-200">{p.name}</span>
                     </div>
                     <div className="text-right">
                        {action?.status === 'completed' ? (
                           <div className="flex flex-col items-end">
-                             <span className="text-[10px] text-sky-400 font-black bg-sky-500/10 px-3 py-1 rounded-lg border border-sky-500/20 shadow-sm animate-fade-in">
+                             <span className="text-xs text-sky-400 font-black bg-sky-500/10 px-3 py-1 rounded-lg border border-sky-500/20 shadow-sm animate-fade-in">
                                 {roomState.players[action.targetUid || '']?.name || '완료'}
                                 {action.target2Uid && `, ${roomState.players[action.target2Uid]?.name}`}
                              </span>
                           </div>
                        ) : (
-                          <span className="text-[10px] text-slate-700 font-black animate-pulse italic uppercase tracking-wider">대기 중</span>
+                          <span className="text-xs text-slate-700 font-black animate-pulse italic uppercase tracking-wider">대기 중</span>
                        )}
                     </div>
                  </div>
@@ -187,14 +187,14 @@ export function STNightDashboard() {
       {/* 2. 사망자 확정 Section */}
       <section className="bg-slate-900/90 p-8 rounded-[2.5rem] border border-slate-800 shadow-2xl relative overflow-hidden">
          <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 blur-3xl pointer-events-none"></div>
-         <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mb-8 border-b border-slate-800/50 pb-4">아침 사망자 명단 확정</h3>
+         <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.4em] mb-8 border-b border-slate-800/50 pb-4">아침 사망자 명단 확정</h3>
          <div className="flex flex-wrap gap-3 mb-6">
             {players.map(p => (
                <button
                  key={p.uid}
                  onClick={() => toggleDeath(p.uid)}
                  className={cn(
-                   "px-4 py-3 rounded-2xl text-[11px] font-black border transition-all duration-300 active:scale-95",
+                   "px-4 py-3 rounded-2xl text-sm font-black border transition-all duration-300 active:scale-95",
                    p.isDead ? "hidden" : (
                       pendingDeaths.includes(p.uid)
                       ? "bg-rose-600 border-rose-400 text-white shadow-lg shadow-rose-900/40 z-10"
@@ -208,7 +208,7 @@ export function STNightDashboard() {
          </div>
          <div className="flex items-start gap-2 bg-slate-950/40 p-4 rounded-xl border border-slate-800/30">
             <span className="text-amber-500 text-xs">ℹ️</span>
-            <p className="text-[10px] text-slate-500 leading-relaxed italic">
+            <p className="text-xs text-slate-500 leading-relaxed italic">
                시스템이 악마의 공격을 계산하여 제안했습니다. 시장의 능력 발동이나 군인의 생존 등 변수가 있다면 위 명단을 직접 수정하세요. 붉은색으로 표시된 인원들이 다음 아침에 사망한 것으로 발표됩니다.
             </p>
          </div>
@@ -218,10 +218,10 @@ export function STNightDashboard() {
       <section className="bg-slate-900/90 p-8 rounded-[2.5rem] border border-slate-800 shadow-2xl relative overflow-hidden">
          <div className="absolute top-0 right-0 w-32 h-32 bg-sky-500/5 blur-3xl pointer-events-none"></div>
          <div className="flex justify-between items-center mb-8 border-b border-slate-800/50 pb-4">
-            <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">개별 정보 메시지 작성</h3>
+            <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.4em]">개별 정보 메시지 작성</h3>
             <button 
                onClick={generateAutoSuggestions}
-               className="text-[10px] font-black bg-sky-500 text-slate-950 px-4 py-1.5 rounded-full hover:bg-sky-400 transition-all active:scale-95 shadow-lg shadow-sky-950/40 uppercase tracking-tighter"
+               className="text-xs font-black bg-sky-500 text-slate-950 px-4 py-1.5 rounded-full hover:bg-sky-400 transition-all active:scale-95 shadow-lg shadow-sky-950/40 uppercase tracking-tighter"
             >
                자동 제안 생성
             </button>
@@ -237,15 +237,15 @@ export function STNightDashboard() {
                           <div className={cn("w-2 h-2 rounded-full shadow-sm", p.isDead ? "bg-slate-700" : "bg-emerald-500 shadow-emerald-500/20")}></div>
                           <span className="text-sm font-black text-slate-200">
                              {p.name} 
-                             <span className="text-[10px] text-slate-500 font-bold ml-2 tracking-widest">({getRoleName(secret?.character)})</span>
+                             <span className="text-xs text-slate-500 font-bold ml-2 tracking-widest">({getRoleName(secret?.character)})</span>
                           </span>
                        </div>
                        <div className="flex gap-1.5">
-                          {secret?.character === 'dead_imp' && <span className="text-[9px] bg-rose-950 text-rose-500 border border-rose-900/50 px-2 py-0.5 rounded-full font-black uppercase shadow-sm">구 임프</span>}
-                          {secret?.character === 'imp' && <span className="text-[9px] bg-rose-600 text-white border border-rose-500 px-2 py-0.5 rounded-full font-black uppercase shadow-sm animate-pulse">현 임프</span>}
-                          {pendingPoisoned === p.uid && <span className="text-[9px] bg-purple-600/20 text-purple-400 border border-purple-600/30 px-2 py-0.5 rounded-full font-black uppercase shadow-sm animate-pulse">독</span>}
-                          {secret?.isDrunk && <span className="text-[9px] bg-amber-600/20 text-amber-500 border border-amber-600/30 px-2 py-0.5 rounded-full font-black uppercase shadow-sm">취함</span>}
-                          {p.isDead && p.hasGhostVote && <span className="text-[9px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-black uppercase animate-pulse">유령 표</span>}
+                          {secret?.character === 'dead_imp' && <span className="text-xs bg-rose-950 text-rose-500 border border-rose-900/50 px-2 py-0.5 rounded-full font-black uppercase shadow-sm">구 임프</span>}
+                          {secret?.character === 'imp' && <span className="text-xs bg-rose-600 text-white border border-rose-500 px-2 py-0.5 rounded-full font-black uppercase shadow-sm animate-pulse">현 임프</span>}
+                          {pendingPoisoned === p.uid && <span className="text-xs bg-purple-600/20 text-purple-400 border border-purple-600/30 px-2 py-0.5 rounded-full font-black uppercase shadow-sm animate-pulse">독</span>}
+                          {secret?.isDrunk && <span className="text-xs bg-amber-600/20 text-amber-500 border border-amber-600/30 px-2 py-0.5 rounded-full font-black uppercase shadow-sm">취함</span>}
+                          {p.isDead && p.hasGhostVote && <span className="text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-black uppercase animate-pulse">유령 표</span>}
                        </div>
                     </div>
                     <textarea

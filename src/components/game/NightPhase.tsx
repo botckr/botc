@@ -85,7 +85,7 @@ export function NightPhase({ isST }: { isST: boolean }) {
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-sky-500/50 to-transparent"></div>
         
         <div className="space-y-2">
-           <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">Current Phase</p>
+           <p className="text-xs font-black text-slate-500 uppercase tracking-[0.4em]">Current Phase</p>
            <h2 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tighter italic font-serif">The Night Deepens</h2>
         </div>
 
@@ -96,13 +96,13 @@ export function NightPhase({ isST }: { isST: boolean }) {
                  <div className="w-4 h-4 bg-sky-500 rounded-full absolute"></div>
               </div>
               <p className="text-sky-400 font-black uppercase tracking-widest text-sm">Action Transmitted</p>
-              <p className="text-slate-500 text-[11px] sm:text-xs leading-relaxed break-keep-all">스토리텔러가 밤의 결산을 마치고 아침을 깨울 때까지 기다려 주세요.</p>
+              <p className="text-slate-500 text-sm sm:text-xs leading-relaxed break-keep-all">스토리텔러가 밤의 결산을 마치고 아침을 깨울 때까지 기다려 주세요.</p>
            </div>
         ) : (
            <div className="space-y-6 sm:space-y-8 animate-fade-in">
               {needsTarget || needsTwoTargets || isButler ? (
                  <div className="space-y-4 sm:space-y-6">
-                    <p className="text-[11px] sm:text-xs font-black text-slate-400 uppercase tracking-widest">{isButler ? '주인을 선택하세요' : '능력을 사용할 대상을 선택하세요'}</p>
+                    <p className="text-sm sm:text-xs font-black text-slate-400 uppercase tracking-widest">{isButler ? '주인을 선택하세요' : '능력을 사용할 대상을 선택하세요'}</p>
                     <div className="grid grid-cols-2 gap-2 pr-2">
                        {selectablePlayers.map(p => (
                           <button
@@ -118,7 +118,7 @@ export function NightPhase({ isST }: { isST: boolean }) {
                                }
                             }}
                             className={cn(
-                               "p-3 sm:p-4 rounded-2xl border text-[11px] sm:text-xs font-black uppercase transition-all truncate outline-none",
+                               "p-3 sm:p-4 rounded-2xl border text-sm sm:text-xs font-black uppercase transition-all truncate outline-none",
                                (targetUid === p.uid || target2Uid === p.uid)
                                 ? "bg-sky-600 border-sky-400 text-white shadow-lg shadow-sky-900/40"
                                 : "bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-600 focus-visible:ring-2 focus-visible:ring-sky-500"
@@ -131,7 +131,7 @@ export function NightPhase({ isST }: { isST: boolean }) {
                  </div>
               ) : (
                  <div className="py-8 sm:py-10 px-4 bg-slate-950/40 rounded-[2rem] sm:rounded-[2.5rem] border border-slate-800 shadow-inner">
-                    <p className="text-slate-400 text-[11px] sm:text-xs font-bold leading-relaxed uppercase tracking-widest italic break-keep-all">당신은 밤에 깨지 않는 역할이거나,<br/>오늘 밤 특별한 행동이 필요하지 않습니다.</p>
+                    <p className="text-slate-400 text-sm sm:text-xs font-bold leading-relaxed uppercase tracking-widest italic break-keep-all">당신은 밤에 깨지 않는 역할이거나,<br/>오늘 밤 특별한 행동이 필요하지 않습니다.</p>
                  </div>
               )}
               

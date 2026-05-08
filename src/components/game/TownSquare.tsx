@@ -91,7 +91,7 @@ const PlayerToken = memo(({
 
       <div className="mt-3 flex flex-col items-center gap-1 max-w-[100px]">
         <span className={cn(
-          "text-[11px] font-black uppercase tracking-widest truncate w-full text-center px-2 py-0.5 rounded transition-all",
+          "text-sm font-black uppercase tracking-widest truncate w-full text-center px-2 py-0.5 rounded transition-all",
           isDead ? "text-slate-700" : "text-slate-200 bg-slate-900/40 border border-slate-800 shadow-sm",
           isSelectingNominator && "text-sky-400 bg-sky-950 border-sky-500/50",
           isNominated && "text-amber-400 bg-amber-950 border-amber-500/50",
@@ -103,16 +103,16 @@ const PlayerToken = memo(({
         {showFullInfo && (
            <div className="flex flex-col items-center">
              <span className={cn(
-               "text-[9px] font-bold uppercase tracking-wider leading-none mb-1",
+               "text-xs font-bold uppercase tracking-wider leading-none mb-1",
                secret?.alignment === 'evil' ? "text-rose-500/90" : "text-sky-400/90"
              )}>
                {getRoleName(secret?.character)}
              </span>
              
              <div className="flex gap-1 mt-1 flex-wrap justify-center">
-                {isPoisoned && <span className="text-[8px] font-black bg-purple-600 text-white px-1.5 py-0.5 rounded shadow-sm uppercase">Psn</span>}
-                {isDrunk && <span className="text-[8px] font-black bg-amber-600 text-slate-950 px-1.5 py-0.5 rounded shadow-sm uppercase">Drk</span>}
-                {isUsed && <span className="text-[8px] font-black bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded shadow-sm uppercase">Used</span>}
+                {isPoisoned && <span className="text-xs font-black bg-purple-600 text-white px-1.5 py-0.5 rounded shadow-sm uppercase">Psn</span>}
+                {isDrunk && <span className="text-xs font-black bg-amber-600 text-slate-950 px-1.5 py-0.5 rounded shadow-sm uppercase">Drk</span>}
+                {isUsed && <span className="text-xs font-black bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded shadow-sm uppercase">Used</span>}
              </div>
            </div>
         )}
@@ -271,7 +271,7 @@ export function TownSquare() {
       <div className="relative w-[360px] h-[360px] bg-slate-900/10 rounded-full border border-slate-800/30 flex items-center justify-center">
         {role === 'st' && !isVoting && (
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none z-10 animate-fade-in">
-             <p className="text-[10px] font-black uppercase tracking-widest text-slate-600 mb-1">
+             <p className="text-xs font-black uppercase tracking-widest text-slate-600 mb-1">
                {selectedNominator ? "지목할 대상을 클릭하세요" : "지목자를 클릭하세요"}
              </p>
              <div className="flex justify-center gap-1">

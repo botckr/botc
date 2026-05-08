@@ -262,7 +262,7 @@ export function DayPhase({ isST }: { isST: boolean }) {
 
       {isST && lastEvent && lastEvent.type === 'slayer_shot' && (Date.now() - lastEvent.timestamp < 60000) && (
         <div className="bg-rose-600 text-white p-8 rounded-[2.5rem] shadow-2xl animate-bounce text-center space-y-4 mx-4 sm:mx-0">
-           <div><p className="text-[10px] font-black uppercase opacity-80 mb-2 tracking-widest">Slayer Shot Result</p><p className="text-2xl font-black">{lastEvent.actorName} {'->'} {lastEvent.targetName}</p></div>
+           <div><p className="text-xs font-black uppercase opacity-80 mb-2 tracking-widest">Slayer Shot Result</p><p className="text-2xl font-black">{lastEvent.actorName} {'->'} {lastEvent.targetName}</p></div>
            <div className="flex gap-3">
               {lastEvent.status === 'dead' && <div className="flex-1 bg-white text-rose-600 font-black h-16 flex items-center justify-center rounded-xl text-xl">DEAD</div>}
               {lastEvent.status === 'miss' && <div className="flex-1 bg-rose-900 text-white font-black h-16 flex items-center justify-center rounded-xl text-xl">MISS</div>}
@@ -275,7 +275,7 @@ export function DayPhase({ isST }: { isST: boolean }) {
         <h2 className="text-3xl font-black text-slate-100 uppercase tracking-tighter font-serif">{roomState.dayNumber}일차 낮</h2>
         {roomState.executionTargetUid && (
           <div className="text-right">
-            <p className="text-[10px] text-rose-500 font-black uppercase tracking-widest">Candidate</p>
+            <p className="text-xs text-rose-500 font-black uppercase tracking-widest">Candidate</p>
             <p className="text-base text-white font-bold">{roomState.players[roomState.executionTargetUid]?.name}</p>
           </div>
         )}
@@ -285,18 +285,18 @@ export function DayPhase({ isST }: { isST: boolean }) {
         <div className="bg-slate-950 p-8 rounded-[2.5rem] border border-sky-500/30 text-center relative overflow-hidden shadow-2xl animate-fade-in mx-4 sm:mx-0">
           <h3 className="text-sky-400 font-black uppercase text-sm tracking-[0.3em] mb-6">투표 진행 중</h3>
           <p className="text-slate-300 mb-8 leading-tight">
-             <span className="text-slate-500 text-[11px] uppercase font-bold mb-2 block tracking-widest">지목자: {roomState.players[currentNomination.nominatorUid]?.name}</span>
+             <span className="text-slate-500 text-sm uppercase font-bold mb-2 block tracking-widest">지목자: {roomState.players[currentNomination.nominatorUid]?.name}</span>
              <span className="font-black text-white text-3xl uppercase tracking-tighter border-b-4 border-sky-500/20 pb-1 inline-block">{roomState.players[currentNomination.targetUid]?.name}</span>
           </p>
           <div className="flex justify-center mb-10">
             <div className="flex flex-col items-center bg-slate-900/60 p-8 rounded-[2rem] border border-sky-500/20 shadow-inner relative min-w-[160px]">
-              <span className="text-7xl font-black text-sky-400 mb-3">{yesCount}</span>
+              <span className="text-4xl font-black text-sky-400 mb-3">{yesCount}</span>
               <span className="text-xs font-black text-slate-500 uppercase tracking-widest">찬성 (최소 필요: {majorityNeeded})</span>
               {roomState.players[user.uid]?.isDead && roomState.players[user.uid]?.hasGhostVote && (
-                 <div className="absolute -top-4 bg-amber-500 text-slate-950 text-[10px] font-black px-3 py-1 rounded-full animate-pulse shadow-lg">유령 투표권 있음</div>
+                 <div className="absolute -top-4 bg-amber-500 text-slate-950 text-xs font-black px-3 py-1 rounded-full animate-pulse shadow-lg">유령 투표권 있음</div>
               )}
               {roomState.players[user.uid]?.isDead && !roomState.players[user.uid]?.hasGhostVote && voters[user.uid] === true && (
-                 <div className="absolute -top-4 bg-rose-600 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg">투표권 소모됨</div>
+                 <div className="absolute -top-4 bg-rose-600 text-white text-xs font-black px-3 py-1 rounded-full shadow-lg">투표권 소모됨</div>
               )}
             </div>
           </div>
@@ -327,7 +327,7 @@ export function DayPhase({ isST }: { isST: boolean }) {
               {(playerSecret?.fakeCharacter || playerSecret?.character) === 'butler' && !roomState.players[user.uid]?.isDead && (
                  <div className="text-center p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 shadow-inner">
                     <p className="text-xs font-black text-amber-500 uppercase tracking-widest mb-1">집사 제약 (Butler Restriction)</p>
-                    <p className="text-[11px] text-slate-300 font-medium">
+                    <p className="text-sm text-slate-300 font-medium">
                       {playerSecret?.butlerMasterUid 
                         ? voters[playerSecret.butlerMasterUid] === true
                            ? <span className="text-emerald-400">주인({roomState.players[playerSecret.butlerMasterUid]?.name})이 찬성했습니다. 이제 투표할 수 있습니다!</span>
@@ -342,7 +342,7 @@ export function DayPhase({ isST }: { isST: boolean }) {
             <div className="flex flex-col gap-3">
                {isButlerVotingIllegally && (
                   <div className="bg-rose-950/40 border border-rose-500/50 p-4 rounded-2xl mb-2 text-center animate-pulse">
-                     <p className="text-[11px] font-black text-rose-400 uppercase tracking-widest mb-1">⚠️ 룰 위반 경고</p>
+                     <p className="text-sm font-black text-rose-400 uppercase tracking-widest mb-1">⚠️ 룰 위반 경고</p>
                      <p className="text-xs text-rose-200">
                         집사(<span className="font-bold">{butlerPlayer?.name}</span>)가 찬성했지만, 
                         주인(<span className="font-bold">{roomState.players[masterUid || '']?.name || '알 수 없음'}</span>)이 찬성을 취소했습니다. 
@@ -374,29 +374,29 @@ export function DayPhase({ isST }: { isST: boolean }) {
 
       {/* Nomination History */}
       <div className="bg-slate-900/60 p-6 rounded-[2.5rem] border border-slate-800 backdrop-blur shadow-xl mt-4 mx-4 sm:mx-0">
-         <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-6 border-b border-slate-800 pb-3">오늘의 투표 기록</h3>
+         <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.3em] mb-6 border-b border-slate-800 pb-3">오늘의 투표 기록</h3>
          <div className="space-y-4">
             {roomState.nominationHistory && roomState.nominationHistory.length > 0 ? (
                roomState.nominationHistory.map((record, i) => (
                  <div key={i} className="bg-slate-950/50 p-4 rounded-[1.5rem] border border-slate-800/50 animate-fade-in shadow-inner">
                     <div className="flex justify-between items-start mb-3">
                        <div className="flex flex-col">
-                          <span className="text-[8px] text-slate-600 font-black uppercase tracking-widest">지목자</span>
+                          <span className="text-xs text-slate-600 font-black uppercase tracking-widest">지목자</span>
                           <span className="text-sm font-bold text-slate-400">{record.nominatorName}</span>
                        </div>
                        <div className="text-sky-500 text-xs mt-2 animate-pulse" aria-hidden="true">▶</div>
                        <div className="flex flex-col text-right">
-                          <span className="text-[8px] text-slate-600 font-black uppercase tracking-widest">대상</span>
+                          <span className="text-xs text-slate-600 font-black uppercase tracking-widest">대상</span>
                           <span className="text-sm font-bold text-sky-400">{record.targetName}</span>
                        </div>
                     </div>
                     <div className="pt-3 border-t border-slate-900/50 flex justify-between items-center">
                        <div className="flex flex-col">
-                          <span className="text-[8px] text-slate-600 font-black uppercase mb-1">찬성 수 ({record.yesCount})</span>
-                          <p className="text-[10px] text-slate-500 italic max-w-[200px] truncate">{record.voterNames.join(', ') || '없음'}</p>
+                          <span className="text-xs text-slate-600 font-black uppercase mb-1">찬성 수 ({record.yesCount})</span>
+                          <p className="text-xs text-slate-500 italic max-w-[200px] truncate">{record.voterNames.join(', ') || '없음'}</p>
                        </div>
                        {record.yesCount >= majorityNeeded && (
-                          <span className="text-[10px] bg-rose-900/30 text-rose-500 border border-rose-900/50 px-2 py-0.5 rounded-full font-black uppercase tracking-tighter">처형 위기</span>
+                          <span className="text-xs bg-rose-900/30 text-rose-500 border border-rose-900/50 px-2 py-0.5 rounded-full font-black uppercase tracking-tighter">처형 위기</span>
                        )}
                     </div>
                  </div>

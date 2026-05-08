@@ -44,8 +44,8 @@ export const PlayerRecords = memo(({
                    <div key={i} className="p-4 sm:p-5 bg-slate-900/80 rounded-[1.25rem] border border-slate-800 shadow-lg text-sm sm:text-base text-slate-300 italic font-serif leading-relaxed relative overflow-hidden group">
                       <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500/20 group-hover:bg-indigo-500 transition-colors"></div>
                       <div className="flex justify-between items-center mb-2 sm:mb-3">
-                         <span className="text-[9px] sm:text-[10px] font-black text-indigo-400/60 uppercase tracking-[0.2em]">기록 #{i + 1}</span>
-                         <span className="text-[8px] font-bold text-slate-700 font-mono text-xs uppercase">밤 {i + 1}</span>
+                         <span className="text-xs sm:text-xs font-black text-indigo-400/60 uppercase tracking-[0.2em]">기록 #{i + 1}</span>
+                         <span className="text-xs font-bold text-slate-700 font-mono text-xs uppercase">밤 {i + 1}</span>
                       </div>
                       <div className="pl-1 sm:pl-2 space-y-1">
                          {msg.split('\n').map((line, j) => (
@@ -56,7 +56,7 @@ export const PlayerRecords = memo(({
                  ))
               ) : (
                  <div className="py-10 sm:py-12 px-6 text-center border-2 border-dashed border-slate-800 rounded-[2rem] bg-slate-950/20 shadow-inner">
-                   <p className="text-slate-700 font-black uppercase tracking-widest text-[10px] sm:text-xs font-serif">복구된 기록이 없습니다.</p>
+                   <p className="text-slate-700 font-black uppercase tracking-widest text-xs sm:text-xs font-serif">복구된 기록이 없습니다.</p>
                  </div>
               )}
            </div>
