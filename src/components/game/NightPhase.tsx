@@ -41,7 +41,7 @@ export function NightPhase({ isST }: { isST: boolean }) {
   const isNight1 = roomState.dayNumber === 1;
   const isDead = myPlayer?.isDead;
 
-  const needsTarget = !isDead && (['poisoner', 'ravenkeeper'].includes(myRole || '') || (myRole === 'imp' && !isNight1) || (myRole === 'monk' && !isNight1));
+  const needsTarget = !isDead && (['poisoner'].includes(myRole || '') || (myRole === 'ravenkeeper' && !isNight1) || (myRole === 'imp' && !isNight1) || (myRole === 'monk' && !isNight1));
   const needsTwoTargets = !isDead && ['fortune_teller'].includes(myRole || '');
   const isButler = !isDead && myRole === 'butler';
 
@@ -49,9 +49,16 @@ export function NightPhase({ isST }: { isST: boolean }) {
 
   const selectablePlayers = players.filter(p => {
     if (myRole === 'imp') {
-      return !p.isDead;
+      const aliveMinions = players.filter(mp => !mp.isDead && playerSecret?.evilTeamInfo?.minionNames.includes(mp.name)).length > 0;
+      if (p.uid === user.uid) return aliveMinions; // Can only select self if alive minions exist
+      return !p.isDead; // Can only select alive people
     }
     if (p.uid === user.uid) return false;
+    
+    if (myRole === 'monk' && p.isDead) return false;
+    if (myRole === 'ravenkeeper' && p.isDead) return false;
+    if (myRole === 'butler' && p.isDead) return false;
+
     if (myRole === 'poisoner' && evilNames.includes(p.name)) return false;
     return true;
   });
@@ -66,7 +73,7 @@ export function NightPhase({ isST }: { isST: boolean }) {
           fakeCharacter={playerSecret?.fakeCharacter}
           alignment={playerSecret?.alignment || null}
           evilTeamInfo={playerSecret?.evilTeamInfo}
-          defaultOpen={isNight1}
+          defaultOpen={true}
           playerName={myPlayer?.name}
         />
       )}
@@ -145,7 +152,7 @@ export function NightPhase({ isST }: { isST: boolean }) {
       {!isST && (
         <PlayerRecords 
           messageHistory={playerSecret?.messageHistory}
-          defaultOpen={!isNight1 && (playerSecret?.messageHistory?.length || 0) > 0}
+          defaultOpen={true}
         />
       )}
     </div>

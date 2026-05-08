@@ -256,9 +256,9 @@ export function DayPhase({ isST }: { isST: boolean }) {
 
       {isVoting && currentNomination && (
         <div className="bg-slate-950 p-8 rounded-[2.5rem] border border-sky-500/30 text-center relative overflow-hidden shadow-2xl animate-fade-in mx-4 sm:mx-0">
-          <h3 className="text-sky-400 font-black uppercase text-sm tracking-[0.3em] mb-6">Vote Active</h3>
+          <h3 className="text-sky-400 font-black uppercase text-sm tracking-[0.3em] mb-6">투표 진행 중</h3>
           <p className="text-slate-300 mb-8 leading-tight">
-             <span className="text-slate-500 text-[11px] uppercase font-bold mb-2 block tracking-widest">Nominator: {roomState.players[currentNomination.nominatorUid]?.name}</span>
+             <span className="text-slate-500 text-[11px] uppercase font-bold mb-2 block tracking-widest">지목자: {roomState.players[currentNomination.nominatorUid]?.name}</span>
              <span className="font-black text-white text-3xl uppercase tracking-tighter border-b-4 border-sky-500/20 pb-1 inline-block">{roomState.players[currentNomination.targetUid]?.name}</span>
           </p>
           <div className="flex justify-center mb-10">
@@ -347,42 +347,42 @@ export function DayPhase({ isST }: { isST: boolean }) {
 
       {/* Nomination History */}
       <div className="bg-slate-900/60 p-6 rounded-[2.5rem] border border-slate-800 backdrop-blur shadow-xl mt-4 mx-4 sm:mx-0">
-         <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-6 border-b border-slate-800 pb-3">Daily Nomination Log</h3>
+         <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-6 border-b border-slate-800 pb-3">오늘의 투표 기록</h3>
          <div className="space-y-4">
             {roomState.nominationHistory && roomState.nominationHistory.length > 0 ? (
                roomState.nominationHistory.map((record, i) => (
                  <div key={i} className="bg-slate-950/50 p-4 rounded-[1.5rem] border border-slate-800/50 animate-fade-in shadow-inner">
                     <div className="flex justify-between items-start mb-3">
                        <div className="flex flex-col">
-                          <span className="text-[8px] text-slate-600 font-black uppercase tracking-widest">Nominator</span>
+                          <span className="text-[8px] text-slate-600 font-black uppercase tracking-widest">지목자</span>
                           <span className="text-sm font-bold text-slate-400">{record.nominatorName}</span>
                        </div>
                        <div className="text-sky-500 text-xs mt-2 animate-pulse" aria-hidden="true">▶</div>
                        <div className="flex flex-col text-right">
-                          <span className="text-[8px] text-slate-600 font-black uppercase tracking-widest">Target</span>
+                          <span className="text-[8px] text-slate-600 font-black uppercase tracking-widest">대상</span>
                           <span className="text-sm font-bold text-sky-400">{record.targetName}</span>
                        </div>
                     </div>
                     <div className="pt-3 border-t border-slate-900/50 flex justify-between items-center">
                        <div className="flex flex-col">
-                          <span className="text-[8px] text-slate-600 font-black uppercase mb-1">Yes Votes ({record.yesCount})</span>
-                          <p className="text-[10px] text-slate-500 italic max-w-[200px] truncate">{record.voterNames.join(', ') || 'None'}</p>
+                          <span className="text-[8px] text-slate-600 font-black uppercase mb-1">찬성 수 ({record.yesCount})</span>
+                          <p className="text-[10px] text-slate-500 italic max-w-[200px] truncate">{record.voterNames.join(', ') || '없음'}</p>
                        </div>
                        {record.yesCount >= majorityNeeded && (
-                          <span className="text-[10px] bg-rose-900/30 text-rose-500 border border-rose-900/50 px-2 py-0.5 rounded-full font-black uppercase tracking-tighter">On Block</span>
+                          <span className="text-[10px] bg-rose-900/30 text-rose-500 border border-rose-900/50 px-2 py-0.5 rounded-full font-black uppercase tracking-tighter">처형 위기</span>
                        )}
                     </div>
                  </div>
                ))
             ) : (
-               <p className="text-xs text-slate-600 italic text-center py-10 font-black uppercase tracking-widest opacity-50">No nominations filed today.</p>
+               <p className="text-xs text-slate-600 italic text-center py-10 font-black uppercase tracking-widest opacity-50">오늘은 진행된 투표가 없습니다.</p>
             )}
          </div>
 
          {/* Admin skip/finalize button always visible for ST */}
          {isST && !isVoting && (
             <Button onClick={finalizeDay} variant="danger" size="lg" className="w-full mt-10 font-black uppercase tracking-[0.2em] h-16 shadow-2xl border-transparent">
-               {roomState.executionTargetUid ? 'Execute & Wake Night' : 'End Day (Skip)'}
+               {roomState.executionTargetUid ? '처형 후 밤이 됩니다' : '처형 없이 밤이 됩니다'}
             </Button>
          )}
       </div>

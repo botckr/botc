@@ -42,7 +42,6 @@ export const PlayerIdentity = memo(({
         <div className="flex items-center gap-4 sm:gap-5">
            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-xl sm:text-2xl shadow-inner group-hover:scale-110 transition-transform" aria-hidden="true">🎭</div>
            <div className="text-left">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-sky-500 block mb-1">비밀 정보관</span>
               <span className="text-base sm:text-lg font-black text-slate-200 tracking-tight uppercase font-serif">나의 정체 확인</span>
            </div>
         </div>

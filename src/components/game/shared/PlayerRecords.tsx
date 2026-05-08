@@ -25,8 +25,7 @@ export const PlayerRecords = memo(({
         <div className="flex items-center gap-4 sm:gap-5">
            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-xl sm:text-2xl shadow-inner group-hover:scale-110 transition-transform" aria-hidden="true">📜</div>
            <div className="text-left">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 block mb-1">기록 아카이브</span>
-              <span className="text-base sm:text-lg font-black text-slate-200 tracking-tight uppercase font-serif">과거 정보 기록 보관소</span>
+              <span className="text-base sm:text-lg font-black text-slate-200 tracking-tight uppercase font-serif">기록 아카이브</span>
            </div>
         </div>
         <span 
