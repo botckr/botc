@@ -19,6 +19,7 @@ export function STNightDashboard() {
   const [editedSuggestions, setEditedSuggestions] = useState<Record<string, string>>({});
   const [pendingDeaths, setPendingDeaths] = useState<string[]>([]);
   const [pendingPoisoned, setPendingPoisoned] = useState<string | null>(null);
+  const [mayorTargeted, setMayorTargeted] = useState<{ uid: string, isMisinformed: boolean } | null>(null);
 
   useEffect(() => {
     if (secretState?.nightResults) {
@@ -38,6 +39,22 @@ export function STNightDashboard() {
        
        const poisonedUid = Object.keys(newSecretState.players).find(uid => newSecretState.players[uid].isPoisoned);
        setPendingPoisoned(poisonedUid || null);
+
+       let mTargeted = null;
+       const impEntry = Object.entries(secretState.players).find(([_, p]) => p.character === 'imp' && !roomState.players[_]?.isDead);
+       if (impEntry) {
+          const impUid = impEntry[0];
+          const impAction = secretState.nightActions?.[impUid];
+          const impSecret = secretState.players[impUid];
+          if (impAction?.targetUid) {
+             const targetSecret = secretState.players[impAction.targetUid];
+             if ((targetSecret?.fakeCharacter || targetSecret?.character) === 'mayor') {
+                const isMisinformed = impSecret.isPoisoned || impSecret.isDrunk;
+                mTargeted = { uid: impAction.targetUid, isMisinformed };
+             }
+          }
+       }
+       setMayorTargeted(mTargeted);
     }
   }, [roomState, secretState]);
 
@@ -188,6 +205,19 @@ export function STNightDashboard() {
       <section className="bg-slate-900/90 p-8 rounded-[2.5rem] border border-slate-800 shadow-2xl relative overflow-hidden">
          <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 blur-3xl pointer-events-none"></div>
          <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.4em] mb-8 border-b border-slate-800/50 pb-4">아침 사망자 명단 확정</h3>
+         
+         {mayorTargeted && (
+            <div className="mb-6 bg-amber-500/10 border border-amber-500/30 p-5 rounded-2xl animate-pulse">
+               <h4 className="text-amber-400 font-black uppercase text-sm mb-2">⚠️ 시장 타겟 알림</h4>
+               <p className="text-xs text-amber-200/80 leading-relaxed">
+                  임프가 시장(<span className="font-bold text-amber-400">{roomState.players[mayorTargeted.uid]?.name}</span>)을 공격했습니다. 
+                  <br/>
+                  시장의 능력에 따라 <strong>다른 사람을 대신 죽이거나, 아무도 죽지 않도록(생존 처리) 명단을 직접 변경</strong>할 수 있습니다.
+                  {mayorTargeted.isMisinformed && <span className="block mt-1 text-rose-400">※ 주의: 현재 임프는 취객이거나 중독 상태이므로, 시장의 능력이 올바르게 작동하지 않거나 킬 자체가 무효화될 수 있습니다.</span>}
+               </p>
+            </div>
+         )}
+
          <div className="flex flex-wrap gap-3 mb-6">
             {players.map(p => (
                <button
