@@ -233,10 +233,10 @@ export function TownSquare() {
                     handleDemonDeath(pubClone, secClone, false, selectedNominator);
                  }
 
-                 const winner = checkWinCondition(pubClone, secClone);
-                 if (winner) {
+                 const winResult = checkWinCondition(pubClone, secClone);
+                 if (winResult) {
                     pubClone.status = 'end';
-                    pubClone.winner = winner;
+                    pubClone.winner = winResult.winner;
 
                     secClone.dayLogs = secClone.dayLogs || {};
                     secClone.dayLogs[roomState.dayNumber] = {
@@ -249,6 +249,8 @@ export function TownSquare() {
                        id: newId,
                        timestamp: Date.now(),
                        winner: pubClone.winner,
+                       winReason: winResult.reason,
+                       evilInfo: secClone.evilInfo,
                        players: Object.values(pubClone.players).map((p: any) => ({
                           uid: p.uid,
                           name: p.name,

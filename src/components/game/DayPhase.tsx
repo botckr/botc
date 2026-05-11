@@ -50,10 +50,10 @@ export function DayPhase({ isST }: { isST: boolean }) {
           pubClone.players[targetUid].isDead = true;
           pubClone.players[targetUid].hasGhostVote = true;
           
-          const winner = checkWinCondition(pubClone, secClone);
-          if (winner) {
+          const winResult = checkWinCondition(pubClone, secClone);
+          if (winResult) {
              pubClone.status = 'end';
-             pubClone.winner = winner;
+             pubClone.winner = winResult.winner;
 
              secClone.dayLogs = secClone.dayLogs || {};
              secClone.dayLogs[roomState.dayNumber] = {
@@ -66,6 +66,8 @@ export function DayPhase({ isST }: { isST: boolean }) {
                 id: newId,
                 timestamp: Date.now(),
                 winner: pubClone.winner,
+                winReason: winResult.reason,
+                evilInfo: secClone.evilInfo,
                 players: Object.values(pubClone.players).map((p: any) => ({
                    uid: p.uid,
                    name: p.name,
@@ -206,11 +208,13 @@ export function DayPhase({ isST }: { isST: boolean }) {
        if (targetSecret?.character === 'saint' && !targetSecret.isPoisoned && !targetSecret.isDrunk) {
           pubClone.status = 'end';
           pubClone.winner = 'evil';
+          pubClone.winReason = '성자 처형';
        } else {
-          const winner = checkWinCondition(pubClone, secClone);
-          if (winner) {
+          const winResult = checkWinCondition(pubClone, secClone);
+          if (winResult) {
              pubClone.status = 'end';
-             pubClone.winner = winner;
+             pubClone.winner = winResult.winner;
+             pubClone.winReason = winResult.reason;
           } else {
              pubClone.status = 'night';
              pubClone.dayNumber += 1;
@@ -223,6 +227,7 @@ export function DayPhase({ isST }: { isST: boolean }) {
           if (window.confirm("시장 승리 조건 충족. 게임을 종료할까요?")) {
              pubClone.status = 'end';
              pubClone.winner = 'good';
+             pubClone.winReason = '시장 생존 (생존자 3인 남음)';
           } else {
              pubClone.status = 'night';
              pubClone.dayNumber += 1;
@@ -247,6 +252,8 @@ export function DayPhase({ isST }: { isST: boolean }) {
           id: newId,
           timestamp: Date.now(),
           winner: pubClone.winner,
+          winReason: pubClone.winReason || '알 수 없는 이유',
+          evilInfo: secClone.evilInfo,
           players: Object.values(pubClone.players).map((p: any) => ({
              uid: p.uid,
              name: p.name,

@@ -55,6 +55,19 @@ export function GrimoireSetup() {
     }
   }, [roomState?.players, orderedPlayers.length]);
 
+  useEffect(() => {
+    const hasFortuneTeller = Object.values(assignedRoles).includes('fortune_teller');
+    if (hasFortuneTeller) {
+      if (!redHerringUid || assignedRoles[redHerringUid] === 'imp') {
+        const nonDemons = orderedPlayers.filter(p => assignedRoles[p.uid] !== 'imp');
+        const randomRedHerring = nonDemons[Math.floor(Math.random() * nonDemons.length)]?.uid;
+        if (randomRedHerring) setRedHerringUid(randomRedHerring);
+      }
+    } else {
+      setRedHerringUid("");
+    }
+  }, [assignedRoles, orderedPlayers, redHerringUid]);
+
   const movePlayer = (index: number, direction: -1 | 1) => {
     const newIndex = index + direction;
     if (newIndex < 0 || newIndex >= orderedPlayers.length) return;

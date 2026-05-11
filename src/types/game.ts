@@ -100,6 +100,12 @@ export interface GameHistory {
   id: string;
   timestamp: number;
   winner: 'good' | 'evil';
+  winReason?: string;
+  evilInfo?: {
+    demonUid: string;
+    minionUids: string[];
+    bluffs: RoleType[];
+  } | null;
   players: {
     uid: string;
     name: string;

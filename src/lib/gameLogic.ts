@@ -48,7 +48,7 @@ export function handleDemonDeath(pub: PublicRoomState, sec: SecretRoomState, isS
 /**
  * 현재 게임의 승리 조건을 판정합니다.
  */
-export function checkWinCondition(pub: PublicRoomState, sec: SecretRoomState): 'good' | 'evil' | null {
+export function checkWinCondition(pub: PublicRoomState, sec: SecretRoomState): { winner: 'good' | 'evil', reason: string } | null {
   const alivePlayers = Object.values(pub.players).filter(p => !p.isDead);
   const imp = Object.entries(sec.players).find(([uid, p]) => 
     p.character === 'imp' && !pub.players[uid]?.isDead
@@ -56,12 +56,12 @@ export function checkWinCondition(pub: PublicRoomState, sec: SecretRoomState): '
 
   // 1. 선의 승리: 악마가 죽고 계승자도 없을 때
   if (!imp) {
-    return 'good';
+    return { winner: 'good', reason: '악마(임프) 사망' };
   }
 
   // 2. 악의 승리: 생존자가 2명만 남았을 때 (악마 포함됨)
   if (alivePlayers.length <= 2) {
-    return 'evil';
+    return { winner: 'evil', reason: '생존자 2인(악마 포함) 도달' };
   }
 
   return null;

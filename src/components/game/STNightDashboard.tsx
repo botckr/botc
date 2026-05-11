@@ -139,10 +139,29 @@ export function STNightDashboard() {
        handleDemonDeath(newPublicState, newSecretState, isStarpass, impUid);
     }
 
-    const winner = checkWinCondition(newPublicState, newSecretState);
-    if (winner) {
+    const updates: Record<string, any> = {};
+    const winResult = checkWinCondition(newPublicState, newSecretState);
+    if (winResult) {
        newPublicState.status = 'end';
-       newPublicState.winner = winner;
+       newPublicState.winner = winResult.winner;
+       
+       const newId = `${Date.now()}_${roomId}`;
+       const historyRecord = {
+          id: newId,
+          timestamp: Date.now(),
+          winner: newPublicState.winner,
+          winReason: winResult.reason,
+          evilInfo: newSecretState.evilInfo,
+          players: Object.values(newPublicState.players).map((p: any) => ({
+             uid: p.uid,
+             name: p.name,
+             character: newSecretState.players[p.uid]?.character || null,
+             fakeCharacter: newSecretState.players[p.uid]?.fakeCharacter || null,
+             messageHistory: newSecretState.players[p.uid]?.messageHistory || []
+          })),
+          dayLogs: newSecretState.dayLogs || {}
+       };
+       updates[`history/${newId}`] = historyRecord;
     } else {
        newPublicState.status = 'day';
     }
@@ -150,7 +169,6 @@ export function STNightDashboard() {
     newSecretState.nightResults = {};
     newSecretState.nightActions = {};
 
-    const updates: Record<string, any> = {};
     updates[`public/rooms/${roomId}`] = newPublicState;
     updates[`secret/rooms/${roomId}`] = newSecretState;
     await update(ref(database), updates);
