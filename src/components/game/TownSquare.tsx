@@ -213,7 +213,16 @@ export function TownSquare() {
            updates[`secret/rooms/${roomId}/players/${clickedUid}/isUsed`] = true;
            
            if (!targetSecret.isPoisoned && !targetSecret.isDrunk) {
+              let triggersVirgin = false;
               if (nominatorSecret?.alignment === 'good' && !['butler', 'drunk', 'recluse', 'saint'].includes(nominatorSecret.character || '')) {
+                 triggersVirgin = true;
+              } else if (nominatorSecret?.character === 'spy') {
+                 if (window.confirm("스파이가 처녀를 지목했습니다. 스파이를 마을 주민으로 취급하여 즉시 처형하시겠습니까?")) {
+                    triggersVirgin = true;
+                 }
+              }
+
+              if (triggersVirgin) {
                  virginTriggeredExecution = true;
                  
                  const pubClone = JSON.parse(JSON.stringify(roomState));

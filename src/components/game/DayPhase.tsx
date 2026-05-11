@@ -36,7 +36,13 @@ export function DayPhase({ isST }: { isST: boolean }) {
        }
 
        const isMisinformed = actorSecret?.isDrunk || actorSecret?.isPoisoned;
-       const isTargetImp = targetSecret?.character === 'imp';
+       let isTargetImp = targetSecret?.character === 'imp';
+       
+       if (targetSecret?.character === 'recluse' && !isMisinformed) {
+          if (window.confirm("슬레이어가 은둔자(Recluse)를 맞췄습니다! 은둔자를 악마로 취급하여 명중(DEAD) 처리하시겠습니까?")) {
+             isTargetImp = true;
+          }
+       }
 
        let success = false;
        if (!isMisinformed && isTargetImp) {
