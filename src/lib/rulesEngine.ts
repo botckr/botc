@@ -60,7 +60,7 @@ export function getNightSuggestions(publicState: PublicRoomState, secretState: S
             const decoyCandidates = Object.entries(secretPlayers).filter(([pUid]) => pUid !== uid && pUid !== target[0]);
             const decoy = decoyCandidates[Math.floor(Math.random() * decoyCandidates.length)];
             const msg = isMisinformed 
-              ? `${pubPlayers[decoy[0]]?.name} 또는 ${pubPlayers[uid]?.name}(본인) 중 한 명은 조사자입니다.` 
+              ? `${pubPlayers[decoy[0]]?.name} 또는 ${pubPlayers[uid]?.name}(본인) 중 한 명은 조사관입니다.` 
               : `${pubPlayers[target[0]]?.name} 또는 ${pubPlayers[decoy[0]]?.name} 중 한 명은 ${getRoleName(target[1].character)}입니다.`;
             suggestions[uid] = { message: msg };
           }
@@ -106,7 +106,11 @@ export function getNightSuggestions(publicState: PublicRoomState, secretState: S
           const isT1Evil = isDemon(secretPlayers[action.targetUid]?.character) || secretPlayers[action.targetUid]?.isRedHerring;
           const isT2Evil = isDemon(secretPlayers[action.target2Uid]?.character) || secretPlayers[action.target2Uid]?.isRedHerring;
           const realAnswer = isT1Evil || isT2Evil;
-          suggestions[uid] = { message: (isMisinformed ? !realAnswer : realAnswer) ? 'Yes' : 'No' };
+          
+          const hasRecluse = secretPlayers[action.targetUid]?.character === 'recluse' || secretPlayers[action.target2Uid]?.character === 'recluse';
+          const warning = hasRecluse ? ' (※ 은둔자가 포함되어 있습니다. 악마로 판정할지 ST가 결정하세요.)' : '';
+          
+          suggestions[uid] = { message: ((isMisinformed ? !realAnswer : realAnswer) ? 'Yes' : 'No') + warning };
         }
         break;
 

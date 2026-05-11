@@ -8,7 +8,7 @@ import { Button } from '../ui/Button';
 const TROUBLE_BREWING_ROLES: { id: RoleType; name: string; align: Alignment; type: string }[] = [
   { id: 'washerwoman', name: '세탁부', align: 'good', type: 'townsfolk' },
   { id: 'librarian', name: '사서', align: 'good', type: 'townsfolk' },
-  { id: 'investigator', name: '조사자', align: 'good', type: 'townsfolk' },
+  { id: 'investigator', name: '조사관', align: 'good', type: 'townsfolk' },
   { id: 'chef', name: '요리사', align: 'good', type: 'townsfolk' },
   { id: 'empath', name: '공감자', align: 'good', type: 'townsfolk' },
   { id: 'fortune_teller', name: '점쟁이', align: 'good', type: 'townsfolk' },
@@ -20,7 +20,7 @@ const TROUBLE_BREWING_ROLES: { id: RoleType; name: string; align: Alignment; typ
   { id: 'soldier', name: '군인', align: 'good', type: 'townsfolk' },
   { id: 'mayor', name: '시장', align: 'good', type: 'townsfolk' },
   { id: 'butler', name: '집사', align: 'good', type: 'outsider' },
-  { id: 'drunk', name: '취객', align: 'good', type: 'outsider' },
+  { id: 'drunk', name: '주정뱅이', align: 'good', type: 'outsider' },
   { id: 'recluse', name: '은둔자', align: 'good', type: 'outsider' },
   { id: 'saint', name: '성자', align: 'good', type: 'outsider' },
   { id: 'poisoner', name: '독술사', align: 'evil', type: 'minion' },

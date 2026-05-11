@@ -213,7 +213,7 @@ export function STNightDashboard() {
                   임프가 시장(<span className="font-bold text-amber-400">{roomState.players[mayorTargeted.uid]?.name}</span>)을 공격했습니다. 
                   <br/>
                   시장의 능력에 따라 <strong>다른 사람을 대신 죽이거나, 아무도 죽지 않도록(생존 처리) 명단을 직접 변경</strong>할 수 있습니다.
-                  {mayorTargeted.isMisinformed && <span className="block mt-1 text-rose-400">※ 주의: 현재 임프는 취객이거나 중독 상태이므로, 시장의 능력이 올바르게 작동하지 않거나 킬 자체가 무효화될 수 있습니다.</span>}
+                  {mayorTargeted.isMisinformed && <span className="block mt-1 text-rose-400">※ 주의: 현재 임프는 주정뱅이거나 중독 상태이므로, 시장의 능력이 올바르게 작동하지 않거나 킬 자체가 무효화될 수 있습니다.</span>}
                </p>
             </div>
          )}
