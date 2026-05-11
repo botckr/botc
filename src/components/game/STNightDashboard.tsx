@@ -17,6 +17,7 @@ export function STNightDashboard() {
   const { secretState } = useSecretData(roomId, true);
   
   const [editedSuggestions, setEditedSuggestions] = useState<Record<string, string>>({});
+  const [suggestionWarnings, setSuggestionWarnings] = useState<Record<string, string>>({});
   const [pendingDeaths, setPendingDeaths] = useState<string[]>([]);
   const [pendingPoisoned, setPendingPoisoned] = useState<string | null>(null);
   const [mayorTargeted, setMayorTargeted] = useState<{ uid: string, isMisinformed: boolean } | null>(null);
@@ -24,10 +25,13 @@ export function STNightDashboard() {
   useEffect(() => {
     if (secretState?.nightResults) {
       const results: Record<string, string> = {};
-      Object.entries(secretState.nightResults).forEach(([uid, res]) => {
+      const warnings: Record<string, string> = {};
+      Object.entries(secretState.nightResults).forEach(([uid, res]: [string, any]) => {
         results[uid] = res.message;
+        if (res.warning) warnings[uid] = res.warning;
       });
       setEditedSuggestions(prev => ({ ...results, ...prev }));
+      setSuggestionWarnings(prev => ({ ...warnings, ...prev }));
     }
     
     if (roomState && secretState) {
@@ -70,11 +74,14 @@ export function STNightDashboard() {
      });
      const suggestions = getNightSuggestions(roomState, secretState, simPubState);
      const newEdits: Record<string, string> = { ...editedSuggestions };
-     Object.entries(suggestions).forEach(([uid, res]) => {
+     const newWarnings: Record<string, string> = { ...suggestionWarnings };
+     Object.entries(suggestions).forEach(([uid, res]: [string, any]) => {
         newEdits[uid] = res.message;
+        if (res.warning) newWarnings[uid] = res.warning;
      });
      setEditedSuggestions(newEdits);
-  }, [roomState, secretState, editedSuggestions, pendingDeaths]);
+     setSuggestionWarnings(newWarnings);
+  }, [roomState, secretState, editedSuggestions, suggestionWarnings, pendingDeaths]);
 
   const toggleDeath = useCallback((uid: string) => {
     setPendingDeaths(prev => 
@@ -282,6 +289,11 @@ export function STNightDashboard() {
                           {p.isDead && p.hasGhostVote && <span className="text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-black uppercase animate-pulse">유령 표</span>}
                        </div>
                     </div>
+                    {suggestionWarnings[p.uid] && (
+                       <div className="bg-amber-500/10 border border-amber-500/30 p-3 rounded-xl mb-2 animate-pulse">
+                          <p className="text-[10px] text-amber-400 font-bold leading-relaxed">⚠️ {suggestionWarnings[p.uid]}</p>
+                       </div>
+                    )}
                     <textarea
                       placeholder={`${p.name}님에게 전달할 비밀 정보를 입력하세요...`}
                       value={editedSuggestions[p.uid] || ''}
