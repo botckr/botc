@@ -25,7 +25,8 @@ export function getNightSuggestions(publicState: PublicRoomState, secretState: S
           const townsfolk = Object.entries(secretPlayers).filter(([pUid, p]) => p.alignment === 'good' && pUid !== uid && p.character !== 'drunk' && p.character !== 'washerwoman');
           if (townsfolk.length > 0) {
             const target = townsfolk[Math.floor(Math.random() * townsfolk.length)];
-            const decoy = Object.entries(secretPlayers).filter(([pUid]) => pUid !== uid && pUid !== target[0])[0];
+            const decoyCandidates = Object.entries(secretPlayers).filter(([pUid]) => pUid !== uid && pUid !== target[0]);
+            const decoy = decoyCandidates[Math.floor(Math.random() * decoyCandidates.length)];
             const msg = isMisinformed 
               ? `${pubPlayers[decoy[0]]?.name} 또는 ${pubPlayers[uid]?.name}(본인) 중 한 명은 세탁부입니다.` 
               : `${pubPlayers[target[0]]?.name} 또는 ${pubPlayers[decoy[0]]?.name} 중 한 명은 ${getRoleName(target[1].character)}입니다.`;
@@ -39,7 +40,8 @@ export function getNightSuggestions(publicState: PublicRoomState, secretState: S
           const outsiders = Object.entries(secretPlayers).filter(([_, p]) => p.alignment === 'good' && p.character !== 'drunk' && (p.character === 'butler' || p.character === 'saint' || p.character === 'recluse'));
           if (outsiders.length > 0) {
             const target = outsiders[Math.floor(Math.random() * outsiders.length)];
-            const decoy = Object.entries(secretPlayers).filter(([pUid]) => pUid !== uid && pUid !== target[0])[0];
+            const decoyCandidates = Object.entries(secretPlayers).filter(([pUid]) => pUid !== uid && pUid !== target[0]);
+            const decoy = decoyCandidates[Math.floor(Math.random() * decoyCandidates.length)];
             const msg = isMisinformed 
               ? `${pubPlayers[decoy[0]]?.name} 또는 ${pubPlayers[uid]?.name}(본인) 중 한 명은 사서입니다.` 
               : `${pubPlayers[target[0]]?.name} 또는 ${pubPlayers[decoy[0]]?.name} 중 한 명은 ${getRoleName(target[1].character)}입니다.`;
@@ -55,7 +57,8 @@ export function getNightSuggestions(publicState: PublicRoomState, secretState: S
           const minions = Object.entries(secretPlayers).filter(([_, p]) => p.alignment === 'evil' && p.character !== 'imp');
           if (minions.length > 0) {
             const target = minions[Math.floor(Math.random() * minions.length)];
-            const decoy = Object.entries(secretPlayers).filter(([pUid]) => pUid !== uid && pUid !== target[0])[0];
+            const decoyCandidates = Object.entries(secretPlayers).filter(([pUid]) => pUid !== uid && pUid !== target[0]);
+            const decoy = decoyCandidates[Math.floor(Math.random() * decoyCandidates.length)];
             const msg = isMisinformed 
               ? `${pubPlayers[decoy[0]]?.name} 또는 ${pubPlayers[uid]?.name}(본인) 중 한 명은 조사자입니다.` 
               : `${pubPlayers[target[0]]?.name} 또는 ${pubPlayers[decoy[0]]?.name} 중 한 명은 ${getRoleName(target[1].character)}입니다.`;

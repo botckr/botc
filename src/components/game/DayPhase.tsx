@@ -265,8 +265,8 @@ export function DayPhase({ isST }: { isST: boolean }) {
         <div className="bg-rose-600 text-white p-8 rounded-[2.5rem] shadow-2xl animate-bounce text-center space-y-4 mx-4 sm:mx-0">
            <div><p className="text-xs font-black uppercase opacity-80 mb-2 tracking-widest">Slayer Shot Result</p><p className="text-2xl font-black">{lastEvent.actorName} {'->'} {lastEvent.targetName}</p></div>
            <div className="flex gap-3">
-              {lastEvent.status === 'dead' && <div className="flex-1 bg-white text-rose-600 font-black h-16 flex items-center justify-center rounded-xl text-xl">DEAD</div>}
-              {lastEvent.status === 'miss' && <div className="flex-1 bg-rose-900 text-white font-black h-16 flex items-center justify-center rounded-xl text-xl">MISS</div>}
+              {lastEvent.status === 'dead' && lastEventId && <Button onClick={() => update(ref(database), { [`public/rooms/${roomId}/events/${lastEventId}`]: null })} variant="primary" className="flex-1 bg-white text-rose-600 font-black h-16 flex items-center justify-center rounded-xl text-xl">DEAD (닫기)</Button>}
+              {lastEvent.status === 'miss' && lastEventId && <Button onClick={() => update(ref(database), { [`public/rooms/${roomId}/events/${lastEventId}`]: null })} variant="secondary" className="flex-1 bg-rose-900 text-white border-transparent font-black h-16 flex items-center justify-center rounded-xl text-xl">MISS (닫기)</Button>}
               {lastEvent.status === 'pending' && lastEventId && (
                  <Button onClick={() => handleResolveSlayer(lastEventId, lastEvent)} variant="primary" className="flex-1 bg-slate-950 text-white border-transparent h-16 font-black tracking-widest">판독 결과 확인 (Confirm)</Button>
               )}
