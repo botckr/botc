@@ -204,38 +204,54 @@ export function TownSquare() {
         const targetSecret = secretState?.players[clickedUid];
         const nominatorSecret = secretState?.players[selectedNominator];
         
-        if (targetSecret?.character === 'virgin' && !targetSecret.isPoisoned && !targetSecret.isDrunk && !targetSecret.isUsed) {
-           if (nominatorSecret?.alignment === 'good' && !['butler', 'drunk', 'recluse', 'saint'].includes(nominatorSecret.character || '')) {
-              const pubClone = JSON.parse(JSON.stringify(roomState));
-              const secClone = JSON.parse(JSON.stringify(secretState));
-              pubClone.players[selectedNominator].isDead = true;
-              pubClone.players[selectedNominator].hasGhostVote = true;
-              pubClone.lastExecutedUid = selectedNominator;
-              secClone.players[clickedUid].isUsed = true;
+        let virginTriggeredExecution = false;
+        
+        if (targetSecret?.character === 'virgin' && !targetSecret.isUsed) {
+           const updates: Record<string, any> = {};
+           
+           // 항상 능력이 사용된 것으로 처리 (첫 지목 시)
+           updates[`secret/rooms/${roomId}/players/${clickedUid}/isUsed`] = true;
+           
+           if (!targetSecret.isPoisoned && !targetSecret.isDrunk) {
+              if (nominatorSecret?.alignment === 'good' && !['butler', 'drunk', 'recluse', 'saint'].includes(nominatorSecret.character || '')) {
+                 virginTriggeredExecution = true;
+                 
+                 const pubClone = JSON.parse(JSON.stringify(roomState));
+                 const secClone = JSON.parse(JSON.stringify(secretState));
+                 pubClone.players[selectedNominator].isDead = true;
+                 pubClone.players[selectedNominator].hasGhostVote = true;
+                 pubClone.lastExecutedUid = selectedNominator;
+                 secClone.players[clickedUid].isUsed = true;
 
-              if (secClone.players[selectedNominator]?.character === 'imp') {
-                 handleDemonDeath(pubClone, secClone, false, selectedNominator);
+                 if (secClone.players[selectedNominator]?.character === 'imp') {
+                    handleDemonDeath(pubClone, secClone, false, selectedNominator);
+                 }
+
+                 const winner = checkWinCondition(pubClone, secClone);
+                 if (winner) {
+                    pubClone.status = 'end';
+                    pubClone.winner = winner;
+                 } else {
+                    pubClone.status = 'night';
+                    pubClone.dayNumber += 1;
+                    pubClone.usedNominators = [];
+                    pubClone.usedTargets = [];
+                    pubClone.nominationHistory = [];
+                 }
+
+                 updates[`public/rooms/${roomId}`] = pubClone;
+                 updates[`secret/rooms/${roomId}/players`] = secClone.players;
+                 alert(`처녀(Virgin) 능력이 발동되었습니다! 지목자 ${roomState.players[selectedNominator].name}님이 즉시 처형됩니다.`);
               }
-
-              const winner = checkWinCondition(pubClone, secClone);
-              if (winner) {
-                 pubClone.status = 'end';
-                 pubClone.winner = winner;
-              } else {
-                 pubClone.status = 'night';
-                 pubClone.dayNumber += 1;
-                 pubClone.usedNominators = [];
-                 pubClone.usedTargets = [];
-                 pubClone.nominationHistory = [];
-              }
-
-              const updates: Record<string, any> = {};
-              updates[`public/rooms/${roomId}`] = pubClone;
-              updates[`secret/rooms/${roomId}/players`] = secClone.players;
-              alert(`처녀(Virgin) 능력이 발동되었습니다! 지목자 ${roomState.players[selectedNominator].name}님이 즉시 처형됩니다.`);
+           }
+           
+           if (virginTriggeredExecution) {
               await update(ref(database), updates);
               setSelectedNominator(null);
               return;
+           } else {
+              // 처형되지 않았어도 isUsed는 업데이트해야 하므로
+              await update(ref(database), updates);
            }
         }
 
