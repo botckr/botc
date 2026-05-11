@@ -2,7 +2,7 @@ import { useState, useMemo, memo } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { useSecretData, usePlayerSecretData } from '../../hooks/useFirebaseSync';
 import { cn } from '../../lib/utils/cn';
-import { getRoleName } from '../../constants/roles';
+import { getRoleName, TROUBLE_BREWING_ROLES } from '../../constants/roles';
 import { useAuth } from '../../hooks/useAuth';
 import { database } from '../../lib/firebase';
 import { ref, update } from 'firebase/database';
@@ -147,6 +147,7 @@ export function TownSquare() {
 
   // ST Selection State
   const [selectedNominator, setSelectedNominator] = useState<string | null>(null);
+  const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
 
   if (!roomState) return null;
 
@@ -261,15 +262,60 @@ export function TownSquare() {
   };
 
   return (
-    <div className="w-full flex flex-col items-center select-none py-2 sm:py-6">
+    <div className="w-full flex flex-col items-center select-none py-2 sm:py-6 relative">
       <div className="mb-8 flex items-center justify-between w-full max-w-sm px-4">
         <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.4em] font-serif">Town Square</h3>
         <div className="flex gap-3 items-center">
+           <button 
+             onClick={() => setIsHelpOpen(true)}
+             className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center font-black shadow-sm hover:bg-slate-700 hover:text-white transition-colors"
+             aria-label="캐릭터 도움말"
+           >
+             ?
+           </button>
            <span className="text-xs text-sky-500 font-mono bg-sky-500/10 px-3 py-1 rounded border border-sky-500/20 uppercase font-black tracking-widest">
              DAY {roomState.dayNumber}
            </span>
         </div>
       </div>
+
+      {/* Help Modal */}
+      {isHelpOpen && (
+        <div className="fixed inset-0 z-[200] bg-slate-950/95 backdrop-blur-md overflow-y-auto flex flex-col items-center p-4 sm:p-8 animate-fade-in">
+          <div className="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-2xl relative mb-10">
+             <button 
+               onClick={() => setIsHelpOpen(false)}
+               className="absolute top-6 right-6 w-8 h-8 bg-slate-800 text-slate-400 rounded-full flex items-center justify-center font-black hover:bg-rose-600 hover:text-white transition-colors"
+             >
+               X
+             </button>
+             <h2 className="text-2xl font-black text-slate-200 uppercase tracking-tighter mb-8 border-b border-slate-800 pb-4">캐릭터 가이드</h2>
+             
+             <div className="space-y-8">
+               {['townsfolk', 'outsider', 'minion', 'demon'].map(type => {
+                 const typeLabel = ({ townsfolk: '주민 (Townsfolk)', outsider: '외부자 (Outsider)', minion: '하수인 (Minion)', demon: '악마 (Demon)' } as Record<string, string>)[type];
+                 const typeColor = ({ townsfolk: 'text-sky-400', outsider: 'text-sky-200', minion: 'text-rose-400', demon: 'text-rose-600' } as Record<string, string>)[type] || 'text-slate-400';
+                 const borderColor = typeColor.includes('sky') ? 'border-sky-500' : (typeColor.includes('rose') ? 'border-rose-500' : 'border-slate-500');
+                 const roles = TROUBLE_BREWING_ROLES.filter(r => r.type === type);
+                 
+                 return (
+                   <div key={type} className="space-y-3">
+                     <h3 className={cn("text-xs font-black uppercase tracking-widest border-l-2 pl-3", typeColor, borderColor)}>{typeLabel}</h3>
+                     <div className="space-y-2">
+                       {roles.map(r => (
+                         <div key={r.id} className="bg-slate-950/50 p-3 rounded-xl border border-slate-800">
+                           <span className={cn("text-sm font-bold block mb-1", typeColor)}>{r.name}</span>
+                           <p className="text-xs text-slate-400 leading-relaxed break-keep-all">{r.description}</p>
+                         </div>
+                       ))}
+                     </div>
+                   </div>
+                 )
+               })}
+             </div>
+          </div>
+        </div>
+      )}
 
       <div className="relative w-[360px] h-[360px] bg-slate-900/10 rounded-full border border-slate-800/30 flex items-center justify-center">
         {role === 'st' && !isVoting && (
