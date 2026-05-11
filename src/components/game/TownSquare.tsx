@@ -207,10 +207,7 @@ export function TownSquare() {
         let virginTriggeredExecution = false;
         
         if (targetSecret?.character === 'virgin' && !targetSecret.isUsed) {
-           const updates: Record<string, any> = {};
-           
-           // 항상 능력이 사용된 것으로 처리 (첫 지목 시)
-           updates[`secret/rooms/${roomId}/players/${clickedUid}/isUsed`] = true;
+           let updates: Record<string, any> = {};
            
            if (!targetSecret.isPoisoned && !targetSecret.isDrunk) {
               let triggersVirgin = false;
@@ -230,7 +227,7 @@ export function TownSquare() {
                  pubClone.players[selectedNominator].isDead = true;
                  pubClone.players[selectedNominator].hasGhostVote = true;
                  pubClone.lastExecutedUid = selectedNominator;
-                 secClone.players[clickedUid].isUsed = true;
+                 secClone.players[clickedUid].isUsed = true; // Set isUsed in clone
 
                  if (secClone.players[selectedNominator]?.character === 'imp') {
                     handleDemonDeath(pubClone, secClone, false, selectedNominator);
@@ -260,6 +257,8 @@ export function TownSquare() {
               return;
            } else {
               // 처형되지 않았어도 isUsed는 업데이트해야 하므로
+              updates = {};
+              updates[`secret/rooms/${roomId}/players/${clickedUid}/isUsed`] = true;
               await update(ref(database), updates);
            }
         }
