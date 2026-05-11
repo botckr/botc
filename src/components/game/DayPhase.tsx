@@ -49,12 +49,14 @@ export function DayPhase({ isST }: { isST: boolean }) {
              pubClone.status = 'end';
              pubClone.winner = winner;
           }
-          
-          updates[`public/rooms/${roomId}`] = pubClone;
        }
        
+       if (pubClone.events && pubClone.events[eventId]) {
+          pubClone.events[eventId].status = success ? 'dead' : 'miss';
+       }
+       
+       updates[`public/rooms/${roomId}`] = pubClone;
        updates[`secret/rooms/${roomId}/players`] = secClone.players;
-       updates[`public/rooms/${roomId}/events/${eventId}/status`] = success ? 'dead' : 'miss';
     }
     await update(ref(database), updates);
   };
