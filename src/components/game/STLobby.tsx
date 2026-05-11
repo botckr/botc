@@ -7,15 +7,21 @@ import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../ui/Button';
 
 import { GrimoireSetup } from './GrimoireSetup';
+import { HistoryViewer } from './HistoryViewer';
 
 export function STLobby() {
   const { user } = useAuth();
   const { roomId, setRoomId } = useGameStore();
   const [loading, setLoading] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
 
   const { roomState } = useGameStore();
   const { updatePublicState } = useGameData(roomId);
   useSecretData(roomId, true); // true because ST
+
+  if (showHistory) {
+     return <HistoryViewer onClose={() => setShowHistory(false)} />;
+  }
 
   if (roomState?.status === 'setup') {
     return <GrimoireSetup />;
@@ -70,6 +76,14 @@ export function STLobby() {
           className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.2)]"
         >
           새로운 방 생성하기
+        </Button>
+        <Button
+          onClick={() => setShowHistory(true)}
+          variant="secondary"
+          size="lg"
+          className="w-full text-slate-400"
+        >
+          과거 기록 열람
         </Button>
       </div>
     );

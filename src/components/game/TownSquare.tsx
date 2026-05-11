@@ -237,6 +237,28 @@ export function TownSquare() {
                  if (winner) {
                     pubClone.status = 'end';
                     pubClone.winner = winner;
+
+                    secClone.dayLogs = secClone.dayLogs || {};
+                    secClone.dayLogs[roomState.dayNumber] = {
+                       nominations: pubClone.nominationHistory || [],
+                       executedUid: pubClone.executionTargetUid || null
+                    };
+                    
+                    const newId = `${Date.now()}_${roomId}`;
+                    const historyRecord = {
+                       id: newId,
+                       timestamp: Date.now(),
+                       winner: pubClone.winner,
+                       players: Object.values(pubClone.players).map((p: any) => ({
+                          uid: p.uid,
+                          name: p.name,
+                          character: secClone.players[p.uid]?.character || null,
+                          fakeCharacter: secClone.players[p.uid]?.fakeCharacter || null,
+                          messageHistory: secClone.players[p.uid]?.messageHistory || []
+                       })),
+                       dayLogs: secClone.dayLogs
+                    };
+                    updates[`history/${newId}`] = historyRecord;
                  } else {
                     pubClone.status = 'night';
                     pubClone.dayNumber += 1;

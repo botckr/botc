@@ -5,6 +5,10 @@
         ".read": "auth != null"
       }
     },
+    "history": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
     "public": {
       "rooms": {
         "$roomId": {

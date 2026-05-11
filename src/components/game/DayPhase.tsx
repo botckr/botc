@@ -20,7 +20,7 @@ export function DayPhase({ isST }: { isST: boolean }) {
   const lastEvent = lastEventId ? events[lastEventId] : null;
 
   const handleResolveSlayer = async (eventId: string, event: any) => {
-    if (!isST || !secretState) return;
+    if (!isST || !secretState || !roomState) return;
     const actorUid = event.actorUid;
     const targetUid = event.targetUid;
     const updates: Record<string, any> = {};
@@ -54,6 +54,28 @@ export function DayPhase({ isST }: { isST: boolean }) {
           if (winner) {
              pubClone.status = 'end';
              pubClone.winner = winner;
+
+             secClone.dayLogs = secClone.dayLogs || {};
+             secClone.dayLogs[roomState.dayNumber] = {
+                nominations: pubClone.nominationHistory || [],
+                executedUid: pubClone.executionTargetUid || null
+             };
+             
+             const newId = `${Date.now()}_${roomId}`;
+             const historyRecord = {
+                id: newId,
+                timestamp: Date.now(),
+                winner: pubClone.winner,
+                players: Object.values(pubClone.players).map((p: any) => ({
+                   uid: p.uid,
+                   name: p.name,
+                   character: secClone.players[p.uid]?.character || null,
+                   fakeCharacter: secClone.players[p.uid]?.fakeCharacter || null,
+                   messageHistory: secClone.players[p.uid]?.messageHistory || []
+                })),
+                dayLogs: secClone.dayLogs
+             };
+             updates[`history/${newId}`] = historyRecord;
           }
        }
        
@@ -165,11 +187,12 @@ export function DayPhase({ isST }: { isST: boolean }) {
   };
 
   const finalizeDay = async () => {
-    if (!isST || !secretState) return;
+    if (!isST || !secretState || !roomState) return;
     const pubClone = JSON.parse(JSON.stringify(roomState));
     const secClone = JSON.parse(JSON.stringify(secretState));
     const targetUid = pubClone.executionTargetUid;
     const targetSecret = targetUid ? secClone.players[targetUid] : null;
+    const updates: Record<string, any> = {};
 
     if (targetUid) {
        pubClone.players[targetUid].isDead = true;
@@ -210,6 +233,32 @@ export function DayPhase({ isST }: { isST: boolean }) {
        }
     }
 
+    if (pubClone.status === 'night' || pubClone.status === 'end') {
+       secClone.dayLogs = secClone.dayLogs || {};
+       secClone.dayLogs[roomState.dayNumber] = {
+          nominations: pubClone.nominationHistory || [],
+          executedUid: pubClone.executionTargetUid || null
+       };
+    }
+
+    if (pubClone.status === 'end') {
+       const newId = `${Date.now()}_${roomId}`;
+       const historyRecord = {
+          id: newId,
+          timestamp: Date.now(),
+          winner: pubClone.winner,
+          players: Object.values(pubClone.players).map((p: any) => ({
+             uid: p.uid,
+             name: p.name,
+             character: secClone.players[p.uid]?.character || null,
+             fakeCharacter: secClone.players[p.uid]?.fakeCharacter || null,
+             messageHistory: secClone.players[p.uid]?.messageHistory || []
+          })),
+          dayLogs: secClone.dayLogs
+       };
+       updates[`history/${newId}`] = historyRecord;
+    }
+
     if (pubClone.status === 'night') {
        pubClone.highestVotes = 0;
        pubClone.executionTargetUid = null;
@@ -218,9 +267,8 @@ export function DayPhase({ isST }: { isST: boolean }) {
        pubClone.nominationHistory = [];
     }
 
-    const updates: Record<string, any> = {};
     updates[`public/rooms/${roomId}`] = pubClone;
-    updates[`secret/rooms/${roomId}/players`] = secClone.players;
+    updates[`secret/rooms/${roomId}`] = secClone;
     await update(ref(database), updates);
   };
 

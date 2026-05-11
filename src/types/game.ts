@@ -85,9 +85,30 @@ export interface SecretRoomState {
   players: Record<string, SecretPlayer>;
   nightActions: Record<string, NightAction>;
   nightResults: Record<string, NightResult>;
+  dayLogs?: Record<number, {
+    nominations: NominationRecord[];
+    executedUid: string | null;
+  }>;
   evilInfo?: {
     demonUid: string;
     minionUids: string[];
     bluffs: RoleType[];
   } | null;
+}
+
+export interface GameHistory {
+  id: string;
+  timestamp: number;
+  winner: 'good' | 'evil';
+  players: {
+    uid: string;
+    name: string;
+    character: RoleType | null;
+    fakeCharacter?: RoleType | null;
+    messageHistory: string[];
+  }[];
+  dayLogs: Record<number, {
+    nominations: NominationRecord[];
+    executedUid: string | null;
+  }>;
 }
