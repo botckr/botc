@@ -198,6 +198,7 @@ export function STNightDashboard() {
              character: newSecretState.players[p.uid]?.character || null,
              originalCharacter: newSecretState.players[p.uid]?.originalCharacter || null,
              fakeCharacter: newSecretState.players[p.uid]?.fakeCharacter || null,
+             isRedHerring: newSecretState.players[p.uid]?.isRedHerring || false,
              messageHistory: newSecretState.players[p.uid]?.messageHistory || []
           })),
           dayLogs: newSecretState.dayLogs || {}

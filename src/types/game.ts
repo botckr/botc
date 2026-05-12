@@ -117,6 +117,7 @@ export interface GameHistory {
     character: RoleType | null;
     originalCharacter?: RoleType | null;
     fakeCharacter?: RoleType | null;
+    isRedHerring?: boolean;
     messageHistory: string[];
   }[];
   dayLogs: Record<number, {

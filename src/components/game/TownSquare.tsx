@@ -259,6 +259,7 @@ export function TownSquare() {
                           character: secClone.players[p.uid]?.character || null,
                           originalCharacter: secClone.players[p.uid]?.originalCharacter || null,
                           fakeCharacter: secClone.players[p.uid]?.fakeCharacter || null,
+                          isRedHerring: secClone.players[p.uid]?.isRedHerring || false,
                           messageHistory: secClone.players[p.uid]?.messageHistory || []
                        })),
                        dayLogs: secClone.dayLogs
