@@ -274,6 +274,7 @@ export function TownSquare() {
 
                  updates[`public/rooms/${roomId}`] = pubClone;
                  updates[`secret/rooms/${roomId}/players`] = secClone.players;
+                 updates[`secret/rooms/${roomId}/dayLogs`] = secClone.dayLogs;
                  alert(`처녀(Virgin) 능력이 발동되었습니다! 지목자 ${roomState.players[selectedNominator].name}님이 즉시 처형됩니다.`);
               }
            }
