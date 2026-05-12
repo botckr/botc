@@ -237,6 +237,7 @@ export function TownSquare() {
                  
                  secClone.dayLogs = secClone.dayLogs || {};
                  secClone.dayLogs[roomState.dayNumber] = {
+                    ...secClone.dayLogs[roomState.dayNumber],
                     nominations: pubClone.nominationHistory || [],
                     executedUid: pubClone.lastExecutedUid || null,
                     abilityLogs: [...(secClone.dayLogs[roomState.dayNumber]?.abilityLogs || []), `처녀(Virgin) 능력 발동: 지목자 ${nominatorName} 즉시 처형`]

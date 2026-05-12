@@ -93,6 +93,7 @@ export function DayPhase({ isST }: { isST: boolean }) {
        
        updates[`public/rooms/${roomId}`] = pubClone;
        updates[`secret/rooms/${roomId}/players`] = secClone.players;
+       updates[`secret/rooms/${roomId}/dayLogs`] = secClone.dayLogs;
     }
     await update(ref(database), updates);
   };
@@ -248,6 +249,7 @@ export function DayPhase({ isST }: { isST: boolean }) {
     if (pubClone.status === 'night' || pubClone.status === 'end') {
        secClone.dayLogs = secClone.dayLogs || {};
        secClone.dayLogs[roomState.dayNumber] = {
+          ...secClone.dayLogs[roomState.dayNumber],
           nominations: pubClone.nominationHistory || [],
           executedUid: pubClone.executionTargetUid || null,
           abilityLogs: secClone.dayLogs[roomState.dayNumber]?.abilityLogs || []
