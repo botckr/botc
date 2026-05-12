@@ -20,7 +20,7 @@ export const TROUBLE_BREWING_ROLES: { id: RoleType; name: string; align: Alignme
   { id: 'saint', name: '성자', align: 'good', type: 'outsider', description: '당신이 낮에 처형되면 선의 진영이 패배합니다. (악의 진영 승리)' },
   { id: 'poisoner', name: '독술사', align: 'evil', type: 'minion', description: '매일 밤 1명을 선택해 그 밤과 다음 날 낮 동안 중독시킵니다. 중독된 플레이어는 능력이 오작동합니다.' },
   { id: 'spy', name: '스파이', align: 'evil', type: 'minion', description: '매일 밤 스토리텔러의 마도서를 볼 수 있습니다. 선의 진영으로 판정될 수 있습니다.' },
-  { id: 'scarlet_woman', name: '진홍의 여인', align: 'evil', type: 'minion', description: '악마가 죽을 때 생존자가 5명 이상이라면, 당신이 새로운 악마가 됩니다.' },
+  { id: 'scarlet_woman', name: '핏빛 후계자', align: 'evil', type: 'minion', description: '악마가 죽을 때 생존자가 5명 이상이라면, 당신이 새로운 악마가 됩니다.' },
   { id: 'baron', name: '남작', align: 'evil', type: 'minion', description: '초기 세팅 시 게임에 외부인이 2명 추가됩니다.' },
   { id: 'imp', name: '임프', align: 'evil', type: 'demon', description: '매일 밤 1명을 선택해 죽입니다. 자신을 선택해 죽고 하수인에게 악마를 넘겨줄 수 있습니다.' },
 ];

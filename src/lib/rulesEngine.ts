@@ -17,7 +17,11 @@ export function getNightSuggestions(publicState: PublicRoomState, secretState: S
   Object.entries(secretPlayers).forEach(([uid, player]) => {
     const isMisinformed = player.isPoisoned || player.isDrunk;
     const effectiveCharacter = player.isDrunk ? player.fakeCharacter : player.character; 
-    if (!effectiveCharacter || pubPlayers[uid]?.isDead) return;
+    
+    if (!effectiveCharacter) return;
+    
+    // 임프의 공격으로 밤에 사망한 경우 정보 수신 차단 (단, 레이븐키퍼는 사망해야 능력이 발동되므로 예외)
+    if (newPublicState.players[uid]?.isDead && effectiveCharacter !== 'ravenkeeper') return;
 
     switch (effectiveCharacter) {
       case 'washerwoman':

@@ -25,7 +25,7 @@ const TROUBLE_BREWING_ROLES: { id: RoleType; name: string; align: Alignment; typ
   { id: 'saint', name: '성자', align: 'good', type: 'outsider' },
   { id: 'poisoner', name: '독술사', align: 'evil', type: 'minion' },
   { id: 'spy', name: '스파이', align: 'evil', type: 'minion' },
-  { id: 'scarlet_woman', name: '홍등가 여인', align: 'evil', type: 'minion' },
+  { id: 'scarlet_woman', name: '핏빛 후계자', align: 'evil', type: 'minion' },
   { id: 'baron', name: '남작', align: 'evil', type: 'minion' },
   { id: 'imp', name: '임프', align: 'evil', type: 'demon' },
 ];
