@@ -59,6 +59,7 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
           roleText = `${getRoleName(p.originalCharacter)} -> ${getRoleName('imp')}(사망)`;
        }
        if (p.fakeCharacter) roleText += ` (가짜: ${getRoleName(p.fakeCharacter)})`;
+       if (p.isRedHerring) roleText += ` (환각 대상)`;
        text += `- ${p.name}: ${roleText}\n`;
     });
     text += `\n`;
@@ -109,6 +110,7 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
           nightPlayers.forEach(p => {
              let roleText = p.originalCharacter && p.originalCharacter !== p.character && p.character !== 'dead_imp' ? `${getRoleName(p.originalCharacter)} -> ${getRoleName(p.character)}` : (p.originalCharacter && p.character === 'dead_imp' ? `${getRoleName(p.originalCharacter)} -> ${getRoleName('imp')}(사망)` : getRoleName(p.character));
              if (p.fakeCharacter) roleText = `주정뱅이(착각: ${getRoleName(p.fakeCharacter)})`;
+             if (p.isRedHerring) roleText += ` (환각 대상)`;
              text += `- ${p.name}(${roleText}):\n  ${formatNightMessage(p.messageHistory[nightIdx])}\n`;
           });
        } else {
@@ -235,9 +237,12 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
              {selectedHistory.players.map(p => (
                <div key={p.uid} className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center">
                  <span className="font-bold text-slate-200 text-sm">{p.name}</span>
-                 <span className="text-xs text-slate-400 bg-slate-800 px-2 py-1 rounded-full">
-                    {p.originalCharacter && p.originalCharacter !== p.character && p.character !== 'dead_imp' ? `${getRoleName(p.originalCharacter)} -> ${getRoleName(p.character)}` : (p.originalCharacter && p.character === 'dead_imp' ? `${getRoleName(p.originalCharacter)} -> ${getRoleName('imp')}(사망)` : getRoleName(p.character))}
-                    {p.fakeCharacter && <span className="text-amber-500 ml-1">({getRoleName(p.fakeCharacter)})</span>}
+                 <span className="flex items-center gap-1">
+                    {p.isRedHerring && <span className="text-[10px] text-rose-300 bg-rose-950/50 px-2 py-1 rounded-full border border-rose-900/50">환각 대상</span>}
+                    <span className="text-xs text-slate-400 bg-slate-800 px-2 py-1 rounded-full">
+                       {p.originalCharacter && p.originalCharacter !== p.character && p.character !== 'dead_imp' ? `${getRoleName(p.originalCharacter)} -> ${getRoleName(p.character)}` : (p.originalCharacter && p.character === 'dead_imp' ? `${getRoleName(p.originalCharacter)} -> ${getRoleName('imp')}(사망)` : getRoleName(p.character))}
+                       {p.fakeCharacter && <span className="text-amber-500 ml-1">({getRoleName(p.fakeCharacter)})</span>}
+                    </span>
                  </span>
                </div>
              ))}
@@ -258,7 +263,7 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
                         {nightPlayers.length > 0 ? nightPlayers.map(p => (
                            <div key={p.uid} className="bg-slate-950/50 p-3 rounded-xl border border-slate-800">
                               <span className="font-bold text-indigo-300 text-xs block mb-1">
-                                {p.name} ({p.fakeCharacter ? `주정뱅이-착각: ${getRoleName(p.fakeCharacter)}` : (p.originalCharacter && p.originalCharacter !== p.character && p.character !== 'dead_imp' ? `${getRoleName(p.originalCharacter)} -> ${getRoleName(p.character)}` : (p.originalCharacter && p.character === 'dead_imp' ? `${getRoleName(p.originalCharacter)} -> ${getRoleName('imp')}(사망)` : getRoleName(p.character)))})
+                                {p.name} ({p.fakeCharacter ? `주정뱅이-착각: ${getRoleName(p.fakeCharacter)}` : (p.originalCharacter && p.originalCharacter !== p.character && p.character !== 'dead_imp' ? `${getRoleName(p.originalCharacter)} -> ${getRoleName(p.character)}` : (p.originalCharacter && p.character === 'dead_imp' ? `${getRoleName(p.originalCharacter)} -> ${getRoleName('imp')}(사망)` : getRoleName(p.character)))}){p.isRedHerring && <span className="text-rose-300 ml-1">(환각 대상)</span>}
                               </span>
                               <div className="text-xs text-slate-400 whitespace-pre-wrap pl-2 border-l-2 border-slate-700">
                                  {formatNightMessage(p.messageHistory[nightIdx])}
