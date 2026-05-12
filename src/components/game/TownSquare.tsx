@@ -234,15 +234,17 @@ export function TownSquare() {
                  }
 
                  const winResult = checkWinCondition(pubClone, secClone);
+                 
+                 secClone.dayLogs = secClone.dayLogs || {};
+                 secClone.dayLogs[roomState.dayNumber] = {
+                    nominations: pubClone.nominationHistory || [],
+                    executedUid: pubClone.lastExecutedUid || null,
+                    abilityLogs: [...(secClone.dayLogs[roomState.dayNumber]?.abilityLogs || []), `처녀(Virgin) 능력 발동: 지목자 ${nominatorName} 즉시 처형`]
+                 };
+
                  if (winResult) {
                     pubClone.status = 'end';
                     pubClone.winner = winResult.winner;
-
-                    secClone.dayLogs = secClone.dayLogs || {};
-                    secClone.dayLogs[roomState.dayNumber] = {
-                       nominations: pubClone.nominationHistory || [],
-                       executedUid: pubClone.executionTargetUid || null
-                    };
                     
                     const newId = `${Date.now()}_${roomId}`;
                     const historyRecord = {

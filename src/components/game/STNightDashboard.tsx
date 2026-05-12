@@ -132,11 +132,35 @@ export function STNightDashboard() {
     });
 
     const impEntry = Object.entries(newSecretState.players).find(([_, p]) => p.character === 'imp');
-    if (impEntry && newPublicState.players[impEntry[0]]?.isDead) {
+    if (impEntry) {
        const impUid = impEntry[0];
        const impAction = secretState.nightActions?.[impUid];
-       const isStarpass = impAction?.targetUid === impUid;
-       handleDemonDeath(newPublicState, newSecretState, isStarpass, impUid);
+       
+       if (impAction?.targetUid && impAction.targetUid !== impUid) {
+          const targetUid = impAction.targetUid;
+          const isTargetDeadBefore = roomState.players[targetUid].isDead;
+          const isTargetDeadNow = newPublicState.players[targetUid].isDead;
+          
+          if (!isTargetDeadBefore && !isTargetDeadNow) {
+             const targetSecret = newSecretState.players[targetUid];
+             let reason = '수도승 보호 또는 군인 방어';
+             if (newSecretState.players[impUid].isPoisoned || newSecretState.players[impUid].isDrunk) {
+                reason = '임프 중독/취객 상태';
+             } else if (targetSecret?.character === 'mayor') {
+                reason = '시장 능력 무효화/대체';
+             }
+             const extraMsg = `\n  ※ [시스템] 공격 실패: ${roomState.players[targetUid]?.name} 생존 (${reason})`;
+             const impMsgHist = newSecretState.players[impUid].messageHistory;
+             if (impMsgHist && impMsgHist.length > 0) {
+                impMsgHist[impMsgHist.length - 1] += extraMsg;
+             }
+          }
+       }
+
+       if (newPublicState.players[impUid]?.isDead) {
+          const isStarpass = impAction?.targetUid === impUid;
+          handleDemonDeath(newPublicState, newSecretState, isStarpass, impUid);
+       }
     }
 
     const updates: Record<string, any> = {};

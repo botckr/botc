@@ -58,11 +58,29 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
     });
     text += `\n`;
 
-    const maxDays = Math.max(...Object.keys(selectedHistory.dayLogs || {}).map(Number), 1);
+    let maxDays = Math.max(...Object.keys(selectedHistory.dayLogs || {}).map(Number), 1);
+    
+    // messageHistory 길이를 통해 실제 진행된 밤의 횟수를 파악하여 maxDays 보정
+    const maxNights = Math.max(...selectedHistory.players.map(p => p.messageHistory?.length || 0), 1);
+    if (maxNights > maxDays) maxDays = maxNights;
     
     const getSortedNightPlayers = (nightIdx: number) => {
        return [...selectedHistory.players]
-          .filter(p => p.messageHistory && p.messageHistory[nightIdx])
+          .filter(p => {
+             const msg = p.messageHistory?.[nightIdx];
+             if (!msg) return false;
+             // 행동과 수신 정보가 모두 '없음'이면 제외
+             const lines = msg.split('\n').map(l => l.trim());
+             const hasAction = lines.some(l => l.startsWith('행동:') && !l.includes('없음'));
+             const hasInfo = lines.some(l => l.startsWith('수신 정보:') && !l.includes('없음'));
+             // 만약 특수한 시스템 메시지라면 포함 (행동/수신정보 포맷이 아닌 경우)
+             const isStandardFormat = lines.some(l => l.startsWith('행동:')) && lines.some(l => l.startsWith('수신 정보:'));
+             
+             if (isStandardFormat) {
+                return hasAction || hasInfo;
+             }
+             return true;
+          })
           .sort((a, b) => {
              const idxA = NIGHT_ORDER.indexOf(a.character as string);
              const idxB = NIGHT_ORDER.indexOf(b.character as string);
@@ -72,6 +90,11 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
           });
     };
 
+    const formatNightMessage = (msg: string) => {
+       const lines = msg.split('\n').map(l => l.trim());
+       return lines.filter(l => !l.endsWith('없음')).join('\n  ');
+    };
+
     for (let day = 1; day <= maxDays; day++) {
        text += `[${day}일차 밤]\n`;
        const nightIdx = day - 1;
@@ -79,7 +102,9 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
        
        if (nightPlayers.length > 0) {
           nightPlayers.forEach(p => {
-             text += `- ${p.name}(${getRoleName(p.character)}):\n  ${p.messageHistory[nightIdx].replace(/\n/g, '\n  ')}\n`;
+             let roleText = getRoleName(p.character);
+             if (p.fakeCharacter) roleText = `주정뱅이(착각: ${getRoleName(p.fakeCharacter)})`;
+             text += `- ${p.name}(${roleText}):\n  ${formatNightMessage(p.messageHistory[nightIdx])}\n`;
           });
        } else {
           text += `- 기록 없음\n`;
@@ -89,6 +114,14 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
        if (selectedHistory.dayLogs && selectedHistory.dayLogs[day]) {
           text += `[${day}일차 낮]\n`;
           const log = selectedHistory.dayLogs[day];
+          
+          if (log.abilityLogs && log.abilityLogs.length > 0) {
+             text += `능력 발동 내역:\n`;
+             log.abilityLogs.forEach(aLog => {
+                text += `  - ${aLog}\n`;
+             });
+          }
+
           if (log.nominations && log.nominations.length > 0) {
              text += `투표 내역:\n`;
              log.nominations.forEach(n => {
@@ -118,8 +151,36 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
   };
 
   if (selectedHistory) {
-    const maxDays = Math.max(...Object.keys(selectedHistory.dayLogs || {}).map(Number), 1);
+    let maxDays = Math.max(...Object.keys(selectedHistory.dayLogs || {}).map(Number), 1);
+    const maxNights = Math.max(...selectedHistory.players.map(p => p.messageHistory?.length || 0), 1);
+    if (maxNights > maxDays) maxDays = maxNights;
     const dayArray = Array.from({length: maxDays}, (_, i) => i + 1);
+
+    const getSortedNightPlayers = (nightIdx: number) => {
+       return [...selectedHistory.players]
+          .filter(p => {
+             const msg = p.messageHistory?.[nightIdx];
+             if (!msg) return false;
+             const lines = msg.split('\n').map(l => l.trim());
+             const hasAction = lines.some(l => l.startsWith('행동:') && !l.includes('없음'));
+             const hasInfo = lines.some(l => l.startsWith('수신 정보:') && !l.includes('없음'));
+             const isStandardFormat = lines.some(l => l.startsWith('행동:')) && lines.some(l => l.startsWith('수신 정보:'));
+             if (isStandardFormat) return hasAction || hasInfo;
+             return true;
+          })
+          .sort((a, b) => {
+             const idxA = NIGHT_ORDER.indexOf(a.character as string);
+             const idxB = NIGHT_ORDER.indexOf(b.character as string);
+             const valA = idxA === -1 ? 99 : idxA;
+             const valB = idxB === -1 ? 99 : idxB;
+             return valA - valB;
+          });
+    };
+
+    const formatNightMessage = (msg: string) => {
+       const lines = msg.split('\n').map(l => l.trim());
+       return lines.filter(l => !l.endsWith('없음')).join('\n  ');
+    };
 
     return (
       <div className="flex flex-col gap-6 w-full max-w-2xl animate-fade-in bg-slate-900 p-6 rounded-3xl border border-slate-700 h-[80vh] overflow-y-auto custom-scrollbar">
@@ -169,21 +230,23 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
           {dayArray.map(day => {
              const nightIdx = day - 1;
              const log = selectedHistory.dayLogs?.[day];
+             const nightPlayers = getSortedNightPlayers(nightIdx);
              return (
                <div key={day} className="space-y-4 relative">
                   {/* Night Phase */}
                   <div className="bg-indigo-950/20 p-5 rounded-2xl border border-indigo-900/30">
                      <h4 className="text-md font-black text-indigo-400 mb-4">{day}일차 밤</h4>
                      <div className="space-y-3">
-                        {selectedHistory.players.filter(p => p.messageHistory && p.messageHistory[nightIdx]).map(p => (
+                        {nightPlayers.length > 0 ? nightPlayers.map(p => (
                            <div key={p.uid} className="bg-slate-950/50 p-3 rounded-xl border border-slate-800">
-                              <span className="font-bold text-indigo-300 text-xs block mb-1">{p.name} ({getRoleName(p.character)})</span>
+                              <span className="font-bold text-indigo-300 text-xs block mb-1">
+                                {p.name} ({p.fakeCharacter ? `주정뱅이-착각: ${getRoleName(p.fakeCharacter)}` : getRoleName(p.character)})
+                              </span>
                               <div className="text-xs text-slate-400 whitespace-pre-wrap pl-2 border-l-2 border-slate-700">
-                                 {p.messageHistory[nightIdx]}
+                                 {formatNightMessage(p.messageHistory[nightIdx])}
                               </div>
                            </div>
-                        ))}
-                        {selectedHistory.players.filter(p => p.messageHistory && p.messageHistory[nightIdx]).length === 0 && (
+                        )) : (
                            <p className="text-xs text-slate-600">행동 기록 없음</p>
                         )}
                      </div>
@@ -194,6 +257,19 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
                      <div className="bg-sky-950/20 p-5 rounded-2xl border border-sky-900/30">
                        <h4 className="text-md font-black text-sky-400 mb-4">{day}일차 낮</h4>
                        
+                       {log.abilityLogs && log.abilityLogs.length > 0 && (
+                          <div className="mb-4">
+                             <h5 className="text-xs font-black text-slate-500 mb-2">낮 능력 발동 내역</h5>
+                             <ul className="space-y-2">
+                               {log.abilityLogs.map((aLog, idx) => (
+                                 <li key={idx} className="text-sm text-amber-400 font-bold bg-amber-950/20 p-3 rounded-lg border border-amber-900/30">
+                                   {aLog}
+                                 </li>
+                               ))}
+                             </ul>
+                          </div>
+                       )}
+
                        <div className="mb-4">
                           <h5 className="text-xs font-black text-slate-500 mb-2">투표 내역</h5>
                           {log.nominations && log.nominations.length > 0 ? (

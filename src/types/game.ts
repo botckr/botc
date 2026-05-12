@@ -88,6 +88,7 @@ export interface SecretRoomState {
   dayLogs?: Record<number, {
     nominations: NominationRecord[];
     executedUid: string | null;
+    abilityLogs?: string[];
   }>;
   evilInfo?: {
     demonUid: string;
@@ -116,5 +117,6 @@ export interface GameHistory {
   dayLogs: Record<number, {
     nominations: NominationRecord[];
     executedUid: string | null;
+    abilityLogs?: string[];
   }>;
 }

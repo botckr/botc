@@ -49,17 +49,21 @@ export function DayPhase({ isST }: { isST: boolean }) {
           success = true;
           pubClone.players[targetUid].isDead = true;
           pubClone.players[targetUid].hasGhostVote = true;
-          
+       }
+
+       secClone.dayLogs = secClone.dayLogs || {};
+       if (!secClone.dayLogs[roomState.dayNumber]) {
+          secClone.dayLogs[roomState.dayNumber] = { nominations: pubClone.nominationHistory || [], executedUid: null, abilityLogs: [] };
+       }
+       secClone.dayLogs[roomState.dayNumber].abilityLogs = secClone.dayLogs[roomState.dayNumber].abilityLogs || [];
+       secClone.dayLogs[roomState.dayNumber].abilityLogs.push(`${actorSecret?.fakeCharacter === 'slayer' ? '주정뱅이(착각: 슬레이어)' : '슬레이어'} 능력 발동: ${roomState.players[targetUid]?.name} -> ${success ? '명중(DEAD)' : '빗나감(MISS)'}`);
+
+       if (success) {
           const winResult = checkWinCondition(pubClone, secClone);
           if (winResult) {
              pubClone.status = 'end';
              pubClone.winner = winResult.winner;
-
-             secClone.dayLogs = secClone.dayLogs || {};
-             secClone.dayLogs[roomState.dayNumber] = {
-                nominations: pubClone.nominationHistory || [],
-                executedUid: pubClone.executionTargetUid || null
-             };
+             pubClone.winReason = winResult.reason;
              
              const newId = `${Date.now()}_${roomId}`;
              const historyRecord = {
@@ -243,7 +247,8 @@ export function DayPhase({ isST }: { isST: boolean }) {
        secClone.dayLogs = secClone.dayLogs || {};
        secClone.dayLogs[roomState.dayNumber] = {
           nominations: pubClone.nominationHistory || [],
-          executedUid: pubClone.executionTargetUid || null
+          executedUid: pubClone.executionTargetUid || null,
+          abilityLogs: secClone.dayLogs[roomState.dayNumber]?.abilityLogs || []
        };
     }
 
