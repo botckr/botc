@@ -93,6 +93,7 @@ export function DayPhase({ isST }: { isST: boolean }) {
 
   if (!roomState || !user || !roomId) return null;
 
+  const myRole = playerSecret?.fakeCharacter || playerSecret?.character;
   const players = Object.values(roomState.players).sort((a, b) => a.seatIndex - b.seatIndex);
   const isVoting = roomState.status === 'voting';
   const currentNominationKey = roomState.nominations ? Object.keys(roomState.nominations)[0] : null;
@@ -282,7 +283,7 @@ export function DayPhase({ isST }: { isST: boolean }) {
   const hasPendingSlayerShot = Object.values(events).some((e: any) => e.type === 'slayer_shot' && e.actorUid === user.uid && e.status === 'pending');
 
   const handleSlayerShot = async (targetUid: string) => {
-    if (isST || playerSecret?.character !== 'slayer' || playerSecret?.isUsed || hasPendingSlayerShot) return;
+    if (isST || myRole !== 'slayer' || playerSecret?.isUsed || hasPendingSlayerShot) return;
     const targetName = roomState.players[targetUid].name;
     if (window.confirm(`${targetName}님에게 슬레이어 능력을 사용하시겠습니까? (이 능력은 게임 중 단 한 번만 사용 가능합니다.)`)) {
        const eventId = Date.now().toString();
@@ -418,7 +419,7 @@ export function DayPhase({ isST }: { isST: boolean }) {
       )}
 
       {/* Slayer Shot */}
-      {!isST && playerSecret?.character === 'slayer' && !roomState.players[user.uid]?.isDead && !playerSecret?.isUsed && !hasPendingSlayerShot && (
+      {!isST && myRole === 'slayer' && !roomState.players[user.uid]?.isDead && !playerSecret?.isUsed && !hasPendingSlayerShot && (
          <div className="bg-rose-950/30 p-8 rounded-[3rem] border border-rose-500/30 text-center shadow-2xl mt-4 space-y-6 relative overflow-hidden mx-4 sm:mx-0">
             <div className="absolute top-0 left-0 w-full h-1 bg-rose-500/20 animate-pulse"></div>
             <p className="text-sm text-rose-500 font-black uppercase tracking-[0.4em] mb-2">Execute Slayer's Shot</p>
