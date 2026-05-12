@@ -257,6 +257,7 @@ export function TownSquare() {
                           uid: p.uid,
                           name: p.name,
                           character: secClone.players[p.uid]?.character || null,
+                          originalCharacter: secClone.players[p.uid]?.originalCharacter || null,
                           fakeCharacter: secClone.players[p.uid]?.fakeCharacter || null,
                           messageHistory: secClone.players[p.uid]?.messageHistory || []
                        })),

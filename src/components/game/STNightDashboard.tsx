@@ -180,6 +180,7 @@ export function STNightDashboard() {
              uid: p.uid,
              name: p.name,
              character: newSecretState.players[p.uid]?.character || null,
+             originalCharacter: newSecretState.players[p.uid]?.originalCharacter || null,
              fakeCharacter: newSecretState.players[p.uid]?.fakeCharacter || null,
              messageHistory: newSecretState.players[p.uid]?.messageHistory || []
           })),

@@ -156,6 +156,7 @@ export function GrimoireSetup() {
 
         newSecretPlayers[p.uid] = {
           character: roleId || null,
+          originalCharacter: roleId || null,
           fakeCharacter: fakeChar,
           alignment: roleDef?.align || null,
           isDrunk: roleId === 'drunk',

@@ -54,6 +54,7 @@ export interface PublicRoomState {
 
 export interface SecretPlayer {
   character: RoleType | null; 
+  originalCharacter?: RoleType | null;
   fakeCharacter?: RoleType | null; 
   alignment: Alignment | null;
   isDrunk: boolean;
@@ -111,6 +112,7 @@ export interface GameHistory {
     uid: string;
     name: string;
     character: RoleType | null;
+    originalCharacter?: RoleType | null;
     fakeCharacter?: RoleType | null;
     messageHistory: string[];
   }[];
