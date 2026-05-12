@@ -6,6 +6,12 @@ import { getRoleName } from '../../constants/roles';
 import type { GameHistory } from '../../types/game';
 import { cn } from '../../lib/utils/cn';
 
+const NIGHT_ORDER = [
+  'poisoner', 'monk', 'scarlet_woman', 'imp', 'ravenkeeper', 
+  'washerwoman', 'librarian', 'investigator', 'chef', 
+  'undertaker', 'empath', 'fortune_teller', 'butler', 'spy'
+];
+
 export function HistoryViewer({ onClose }: { onClose: () => void }) {
   const [histories, setHistories] = useState<GameHistory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,17 +60,30 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
 
     const maxDays = Math.max(...Object.keys(selectedHistory.dayLogs || {}).map(Number), 1);
     
+    const getSortedNightPlayers = (nightIdx: number) => {
+       return [...selectedHistory.players]
+          .filter(p => p.messageHistory && p.messageHistory[nightIdx])
+          .sort((a, b) => {
+             const idxA = NIGHT_ORDER.indexOf(a.character as string);
+             const idxB = NIGHT_ORDER.indexOf(b.character as string);
+             const valA = idxA === -1 ? 99 : idxA;
+             const valB = idxB === -1 ? 99 : idxB;
+             return valA - valB;
+          });
+    };
+
     for (let day = 1; day <= maxDays; day++) {
        text += `[${day}일차 밤]\n`;
        const nightIdx = day - 1;
-       let anyNightAction = false;
-       selectedHistory.players.forEach(p => {
-          if (p.messageHistory && p.messageHistory[nightIdx]) {
-             anyNightAction = true;
+       const nightPlayers = getSortedNightPlayers(nightIdx);
+       
+       if (nightPlayers.length > 0) {
+          nightPlayers.forEach(p => {
              text += `- ${p.name}(${getRoleName(p.character)}):\n  ${p.messageHistory[nightIdx].replace(/\n/g, '\n  ')}\n`;
-          }
-       });
-       if (!anyNightAction) text += `- 기록 없음\n`;
+          });
+       } else {
+          text += `- 기록 없음\n`;
+       }
        text += `\n`;
 
        if (selectedHistory.dayLogs && selectedHistory.dayLogs[day]) {
