@@ -165,6 +165,22 @@ export function STNightDashboard() {
 
     const updates: Record<string, any> = {};
     const winResult = checkWinCondition(newPublicState, newSecretState);
+    
+    // 다음 날 낮을 위한 생존자 카운트 및 사망자 기록
+    const aliveGood = Object.values(newPublicState.players).filter(p => !p.isDead && newSecretState.players[p.uid]?.alignment === 'good').length;
+    const aliveEvil = Object.values(newPublicState.players).filter(p => !p.isDead && newSecretState.players[p.uid]?.alignment === 'evil').length;
+    const nightDeaths = Object.keys(newPublicState.players).filter(uid => newPublicState.players[uid].isDead && !roomState.players[uid].isDead).map(uid => newPublicState.players[uid].name);
+
+    newSecretState.dayLogs = newSecretState.dayLogs || {};
+    newSecretState.dayLogs[roomState.dayNumber + 1] = {
+       nominations: [],
+       executedUid: null,
+       abilityLogs: [],
+       aliveGood,
+       aliveEvil,
+       nightDeaths
+    };
+
     if (winResult) {
        newPublicState.status = 'end';
        newPublicState.winner = winResult.winner;

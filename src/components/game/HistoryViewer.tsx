@@ -120,6 +120,18 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
           text += `[${day}일차 낮]\n`;
           const log = selectedHistory.dayLogs[day];
           
+          if (log.aliveGood !== undefined && log.aliveEvil !== undefined) {
+             text += `생존자 현황: 선 ${log.aliveGood}명 / 악 ${log.aliveEvil}명\n`;
+          }
+
+          if (log.nightDeaths && log.nightDeaths.length > 0) {
+             const deathList = log.nightDeaths.map(name => {
+                const p = selectedHistory.players.find(pl => pl.name === name);
+                return p ? `${name}(${getRoleName(p.character)})` : name;
+             }).join(', ');
+             text += `밤 사이 사망자: ${deathList}\n`;
+          }
+
           if (log.abilityLogs && log.abilityLogs.length > 0) {
              text += `능력 발동 내역:\n`;
              log.abilityLogs.forEach(aLog => {
@@ -136,7 +148,8 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
              text += `투표 내역: 없음\n`;
           }
           if (log.executedUid) {
-             text += `처형됨: ${selectedHistory.players.find(p => p.uid === log.executedUid)?.name}\n`;
+             const execP = selectedHistory.players.find(p => p.uid === log.executedUid);
+             text += `처형됨: ${execP?.name}(${getRoleName(execP?.character)})\n`;
           } else {
              text += `처형됨: 없음\n`;
           }
@@ -260,8 +273,27 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
                   {/* Day Phase */}
                   {log && (
                      <div className="bg-sky-950/20 p-5 rounded-2xl border border-sky-900/30">
-                       <h4 className="text-md font-black text-sky-400 mb-4">{day}일차 낮</h4>
+                       <h4 className="text-md font-black text-sky-400 mb-4 flex justify-between items-center">
+                          <span>{day}일차 낮</span>
+                          {log.aliveGood !== undefined && log.aliveEvil !== undefined && (
+                             <span className="text-xs text-sky-200/60 bg-sky-900/30 px-2 py-1 rounded">
+                                생존: 선 {log.aliveGood}명 / 악 {log.aliveEvil}명
+                             </span>
+                          )}
+                       </h4>
                        
+                       {log.nightDeaths && log.nightDeaths.length > 0 && (
+                          <div className="mb-4 bg-rose-950/20 p-3 rounded-lg border border-rose-900/30">
+                             <h5 className="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-1">밤 사이 사망자</h5>
+                             <p className="text-sm font-bold text-slate-300">
+                                {log.nightDeaths.map(name => {
+                                   const p = selectedHistory.players.find(pl => pl.name === name);
+                                   return p ? `${name}(${getRoleName(p.character)})` : name;
+                                }).join(', ')}
+                             </p>
+                          </div>
+                       )}
+
                        {log.abilityLogs && log.abilityLogs.length > 0 && (
                           <div className="mb-4">
                              <h5 className="text-xs font-black text-slate-500 mb-2">낮 능력 발동 내역</h5>
@@ -297,7 +329,12 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
                        {log.executedUid && (
                           <div className="bg-rose-950/30 border border-rose-500/20 p-3 rounded-xl text-sm flex items-center justify-between">
                              <span className="text-rose-500 font-black">처형됨</span>
-                             <span className="font-bold text-white">{selectedHistory.players.find(p => p.uid === log.executedUid)?.name}</span>
+                             <span className="font-bold text-white">
+                                {(() => {
+                                   const execP = selectedHistory.players.find(p => p.uid === log.executedUid);
+                                   return execP ? `${execP.name} (${getRoleName(execP.character)})` : '';
+                                })()}
+                             </span>
                           </div>
                        )}
                      </div>

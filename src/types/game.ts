@@ -90,6 +90,9 @@ export interface SecretRoomState {
     nominations: NominationRecord[];
     executedUid: string | null;
     abilityLogs?: string[];
+    aliveGood?: number;
+    aliveEvil?: number;
+    nightDeaths?: string[];
   }>;
   evilInfo?: {
     demonUid: string;
@@ -120,5 +123,8 @@ export interface GameHistory {
     nominations: NominationRecord[];
     executedUid: string | null;
     abilityLogs?: string[];
+    aliveGood?: number;
+    aliveEvil?: number;
+    nightDeaths?: string[];
   }>;
 }

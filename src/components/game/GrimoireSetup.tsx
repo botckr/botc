@@ -188,7 +188,20 @@ export function GrimoireSetup() {
         }
       });
 
-      await updateSecretState({ players: newSecretPlayers } as any);
+      const initialAliveGood = orderedPlayers.filter(p => {
+         const char = assignedRoles[p.uid];
+         const rDef = TROUBLE_BREWING_ROLES.find(r => r.id === char);
+         return rDef?.align === 'good';
+      }).length;
+      const initialAliveEvil = orderedPlayers.length - initialAliveGood;
+
+      await updateSecretState({ 
+        players: newSecretPlayers,
+        evilInfo: demonUid ? { demonUid, minionUids, bluffs: demonBluffs } : null,
+        dayLogs: {
+          1: { nominations: [], executedUid: null, abilityLogs: [], aliveGood: initialAliveGood, aliveEvil: initialAliveEvil, nightDeaths: [] }
+        }
+      } as any);
 
       const newPublicPlayers = { ...roomState.players };
       orderedPlayers.forEach((p, index) => {
