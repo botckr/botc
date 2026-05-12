@@ -151,7 +151,7 @@ export function STNightDashboard() {
           timestamp: Date.now(),
           winner: newPublicState.winner,
           winReason: winResult.reason,
-          evilInfo: newSecretState.evilInfo,
+          evilInfo: newSecretState.evilInfo || null,
           players: Object.values(newPublicState.players).map((p: any) => ({
              uid: p.uid,
              name: p.name,

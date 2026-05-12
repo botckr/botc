@@ -250,7 +250,7 @@ export function TownSquare() {
                        timestamp: Date.now(),
                        winner: pubClone.winner,
                        winReason: winResult.reason,
-                       evilInfo: secClone.evilInfo,
+                       evilInfo: secClone.evilInfo || null,
                        players: Object.values(pubClone.players).map((p: any) => ({
                           uid: p.uid,
                           name: p.name,

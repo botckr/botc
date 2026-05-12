@@ -67,7 +67,7 @@ export function DayPhase({ isST }: { isST: boolean }) {
                 timestamp: Date.now(),
                 winner: pubClone.winner,
                 winReason: winResult.reason,
-                evilInfo: secClone.evilInfo,
+                evilInfo: secClone.evilInfo || null,
                 players: Object.values(pubClone.players).map((p: any) => ({
                    uid: p.uid,
                    name: p.name,
@@ -254,7 +254,7 @@ export function DayPhase({ isST }: { isST: boolean }) {
           timestamp: Date.now(),
           winner: pubClone.winner,
           winReason: pubClone.winReason || '알 수 없는 이유',
-          evilInfo: secClone.evilInfo,
+          evilInfo: secClone.evilInfo || null,
           players: Object.values(pubClone.players).map((p: any) => ({
              uid: p.uid,
              name: p.name,
