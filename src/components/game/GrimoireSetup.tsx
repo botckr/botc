@@ -91,16 +91,26 @@ export function GrimoireSetup() {
   };
 
   const handleRandomRoles = () => {
-    const props = getProportions();
+    let props = GET_BASE_PROPORTIONS(orderedPlayers.length);
+    
+    // 1. 하수인 먼저 무작위 선택
+    const allMinions = TROUBLE_BREWING_ROLES.filter(r => r.type === 'minion').sort(() => Math.random() - 0.5);
+    const selectedMinions = allMinions.slice(0, props.minion);
+    
+    // 2. 남작(Baron)이 포함되었는지 확인 후 비율 조정
+    const hasBaron = selectedMinions.some(m => m.id === 'baron');
+    if (hasBaron) {
+       props = { ...props, townsfolk: Math.max(0, props.townsfolk - 2), outsider: props.outsider + 2 };
+    }
+
     const townsfolks = TROUBLE_BREWING_ROLES.filter(r => r.type === 'townsfolk').sort(() => Math.random() - 0.5);
     const outsiders = TROUBLE_BREWING_ROLES.filter(r => r.type === 'outsider').sort(() => Math.random() - 0.5);
-    const minions = TROUBLE_BREWING_ROLES.filter(r => r.type === 'minion').sort(() => Math.random() - 0.5);
     const demon = TROUBLE_BREWING_ROLES.find(r => r.type === 'demon')!;
 
     const pool = [
       ...townsfolks.slice(0, props.townsfolk).map(r => r.id),
       ...outsiders.slice(0, props.outsider).map(r => r.id),
-      ...minions.slice(0, props.minion).map(r => r.id),
+      ...selectedMinions.map(r => r.id),
       demon.id
     ].sort(() => Math.random() - 0.5);
 

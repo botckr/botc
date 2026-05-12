@@ -10,6 +10,7 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
   const [histories, setHistories] = useState<GameHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedHistory, setSelectedHistory] = useState<GameHistory | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const fetchHistories = async () => {
@@ -30,20 +31,105 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
     fetchHistories();
   }, []);
 
+  const handleCopyText = async () => {
+    if (!selectedHistory) return;
+    
+    let text = `[게임 기본 정보]\n일시: ${new Date(selectedHistory.timestamp).toLocaleString()}\n인원: ${selectedHistory.players.length}인 게임\n`;
+    text += `결과: ${selectedHistory.winner === 'good' ? '선의 승리' : '악의 승리'} (${selectedHistory.winReason})\n\n`;
+    
+    if (selectedHistory.evilInfo) {
+       text += `[초기 악마 정보]\n악마: ${selectedHistory.players.find(p => p.uid === selectedHistory.evilInfo?.demonUid)?.name || '알 수 없음'}\n`;
+       const minionNames = selectedHistory.evilInfo.minionUids.map(u => selectedHistory.players.find(p => p.uid === u)?.name).join(', ');
+       text += `하수인: ${minionNames || '없음'}\n`;
+       text += `악마 블러프: ${selectedHistory.evilInfo.bluffs.map(b => getRoleName(b)).join(', ')}\n\n`;
+    }
+
+    text += `[참가자 명단]\n`;
+    selectedHistory.players.forEach(p => {
+       let roleText = getRoleName(p.character);
+       if (p.fakeCharacter) roleText += ` (가짜: ${getRoleName(p.fakeCharacter)})`;
+       text += `- ${p.name}: ${roleText}\n`;
+    });
+    text += `\n`;
+
+    const maxDays = Math.max(...Object.keys(selectedHistory.dayLogs || {}).map(Number), 1);
+    
+    for (let day = 1; day <= maxDays; day++) {
+       text += `[${day}일차 밤]\n`;
+       const nightIdx = day - 1;
+       let anyNightAction = false;
+       selectedHistory.players.forEach(p => {
+          if (p.messageHistory && p.messageHistory[nightIdx]) {
+             anyNightAction = true;
+             text += `- ${p.name}(${getRoleName(p.character)}):\n  ${p.messageHistory[nightIdx].replace(/\n/g, '\n  ')}\n`;
+          }
+       });
+       if (!anyNightAction) text += `- 기록 없음\n`;
+       text += `\n`;
+
+       if (selectedHistory.dayLogs && selectedHistory.dayLogs[day]) {
+          text += `[${day}일차 낮]\n`;
+          const log = selectedHistory.dayLogs[day];
+          if (log.nominations && log.nominations.length > 0) {
+             text += `투표 내역:\n`;
+             log.nominations.forEach(n => {
+                text += `  - [${n.nominatorName} 지목] ${n.targetName} -> 찬성 ${n.yesCount}명 (${n.voterNames.join(', ')})\n`;
+             });
+          } else {
+             text += `투표 내역: 없음\n`;
+          }
+          if (log.executedUid) {
+             text += `처형됨: ${selectedHistory.players.find(p => p.uid === log.executedUid)?.name}\n`;
+          } else {
+             text += `처형됨: 없음\n`;
+          }
+          text += `\n`;
+       }
+    }
+
+    text += `[최종 결과]\n${selectedHistory.winner === 'good' ? '선의 승리' : '악의 승리'} (${selectedHistory.winReason})\n`;
+
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      alert("클립보드 복사에 실패했습니다.");
+    }
+  };
+
   if (selectedHistory) {
+    const maxDays = Math.max(...Object.keys(selectedHistory.dayLogs || {}).map(Number), 1);
+    const dayArray = Array.from({length: maxDays}, (_, i) => i + 1);
+
     return (
       <div className="flex flex-col gap-6 w-full max-w-2xl animate-fade-in bg-slate-900 p-6 rounded-3xl border border-slate-700 h-[80vh] overflow-y-auto custom-scrollbar">
-        <div className="flex justify-between items-center border-b border-slate-800 pb-4">
+        <div className="flex justify-between items-center border-b border-slate-800 pb-4 sticky top-0 bg-slate-900 z-10">
           <h2 className="text-xl font-black text-sky-400">게임 세부 기록</h2>
-          <Button variant="ghost" size="sm" onClick={() => setSelectedHistory(null)} className="text-slate-400 hover:text-white">뒤로가기</Button>
+          <div className="flex gap-2">
+             <Button variant="secondary" size="sm" onClick={handleCopyText} className="text-xs uppercase font-black">
+               {copied ? '복사 완료!' : '텍스트 복사'}
+             </Button>
+             <Button variant="ghost" size="sm" onClick={() => setSelectedHistory(null)} className="text-slate-400 hover:text-white">뒤로가기</Button>
+          </div>
         </div>
         
         <div className="space-y-4">
           <p className="text-sm text-slate-400">일시: {new Date(selectedHistory.timestamp).toLocaleString()}</p>
-          <p className="text-xl font-black">
-            승리 진영: <span className={selectedHistory.winner === 'good' ? 'text-sky-400' : 'text-rose-500'}>{selectedHistory.winner === 'good' ? '선의 승리' : '악의 승리'}</span>
-          </p>
+          <div className="text-xl font-black flex items-center gap-2">
+            승리 진영: <span className={cn("px-3 py-1 rounded-lg text-sm", selectedHistory.winner === 'good' ? 'bg-sky-500/20 text-sky-400' : 'bg-rose-500/20 text-rose-500')}>{selectedHistory.winner === 'good' ? '선의 승리' : '악의 승리'}</span>
+            <span className="text-sm text-slate-500 font-bold ml-2">({selectedHistory.winReason})</span>
+          </div>
         </div>
+
+        {selectedHistory.evilInfo && (
+           <div className="bg-rose-950/20 p-4 rounded-xl border border-rose-900/30 space-y-2">
+              <h3 className="text-sm font-black text-rose-500 uppercase tracking-widest mb-3">초기 악마 정보</h3>
+              <p className="text-sm text-slate-300"><span className="text-rose-400 font-bold">초기 악마:</span> {selectedHistory.players.find(p => p.uid === selectedHistory.evilInfo?.demonUid)?.name || '알 수 없음'}</p>
+              <p className="text-sm text-slate-300"><span className="text-rose-400 font-bold">초기 하수인:</span> {selectedHistory.evilInfo?.minionUids?.map(u => selectedHistory.players.find(p => p.uid === u)?.name).join(', ') || '없음'}</p>
+              <p className="text-sm text-slate-300"><span className="text-rose-400 font-bold">악마 블러프:</span> {selectedHistory.evilInfo?.bluffs?.map(b => getRoleName(b)).join(', ') || '없음'}</p>
+           </div>
+        )}
 
         <div>
           <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest mb-3">플레이어 정보</h3>
@@ -60,55 +146,65 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        <div className="space-y-6">
-          <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest">일차별 기록</h3>
-          {selectedHistory.dayLogs && Object.entries(selectedHistory.dayLogs).map(([dayStr, log]) => {
-             const dayNum = parseInt(dayStr, 10);
+        <div className="space-y-8">
+          {dayArray.map(day => {
+             const nightIdx = day - 1;
+             const log = selectedHistory.dayLogs?.[day];
              return (
-               <div key={dayNum} className="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-4">
-                 <h4 className="text-lg font-black text-sky-400 border-b border-slate-800 pb-2">{dayNum}일차 낮</h4>
-                 
-                 <div>
-                    <h5 className="text-xs font-black text-slate-500 mb-2">투표 내역</h5>
-                    {log.nominations && log.nominations.length > 0 ? (
-                       <ul className="space-y-2">
-                         {log.nominations.map((n, idx) => (
-                           <li key={idx} className="text-sm text-slate-300">
-                             <span className="text-slate-500">[{n.nominatorName} 지목]</span> <strong className="text-white">{n.targetName}</strong> 
-                             <span className="ml-2 text-sky-400">찬성 {n.yesCount}명</span>
-                             <span className="text-xs text-slate-600 block italic mt-1">({n.voterNames.join(', ')})</span>
-                           </li>
-                         ))}
-                       </ul>
-                    ) : (
-                       <p className="text-xs text-slate-600">투표 없음</p>
-                    )}
-                 </div>
+               <div key={day} className="space-y-4 relative">
+                  {/* Night Phase */}
+                  <div className="bg-indigo-950/20 p-5 rounded-2xl border border-indigo-900/30">
+                     <h4 className="text-md font-black text-indigo-400 mb-4">{day}일차 밤</h4>
+                     <div className="space-y-3">
+                        {selectedHistory.players.filter(p => p.messageHistory && p.messageHistory[nightIdx]).map(p => (
+                           <div key={p.uid} className="bg-slate-950/50 p-3 rounded-xl border border-slate-800">
+                              <span className="font-bold text-indigo-300 text-xs block mb-1">{p.name} ({getRoleName(p.character)})</span>
+                              <div className="text-xs text-slate-400 whitespace-pre-wrap pl-2 border-l-2 border-slate-700">
+                                 {p.messageHistory[nightIdx]}
+                              </div>
+                           </div>
+                        ))}
+                        {selectedHistory.players.filter(p => p.messageHistory && p.messageHistory[nightIdx]).length === 0 && (
+                           <p className="text-xs text-slate-600">행동 기록 없음</p>
+                        )}
+                     </div>
+                  </div>
 
-                 {log.executedUid && (
-                    <div className="bg-rose-950/30 border border-rose-500/20 p-3 rounded-xl text-sm">
-                       <span className="text-rose-500 font-black">처형됨:</span> {selectedHistory.players.find(p => p.uid === log.executedUid)?.name}
-                    </div>
-                 )}
+                  {/* Day Phase */}
+                  {log && (
+                     <div className="bg-sky-950/20 p-5 rounded-2xl border border-sky-900/30">
+                       <h4 className="text-md font-black text-sky-400 mb-4">{day}일차 낮</h4>
+                       
+                       <div className="mb-4">
+                          <h5 className="text-xs font-black text-slate-500 mb-2">투표 내역</h5>
+                          {log.nominations && log.nominations.length > 0 ? (
+                             <ul className="space-y-2">
+                               {log.nominations.map((n, idx) => (
+                                 <li key={idx} className="text-sm text-slate-300 bg-slate-950/50 p-3 rounded-lg border border-slate-800">
+                                   <div className="flex justify-between items-center mb-1">
+                                      <span><span className="text-slate-500 text-xs mr-2">[{n.nominatorName} 지목]</span><strong className="text-white">{n.targetName}</strong></span>
+                                      <span className="text-sky-400 text-xs font-bold bg-sky-500/10 px-2 py-0.5 rounded">찬성 {n.yesCount}명</span>
+                                   </div>
+                                   <span className="text-[10px] text-slate-500 block">투표자: {n.voterNames.join(', ') || '없음'}</span>
+                                 </li>
+                               ))}
+                             </ul>
+                          ) : (
+                             <p className="text-xs text-slate-600">투표 없음</p>
+                          )}
+                       </div>
+
+                       {log.executedUid && (
+                          <div className="bg-rose-950/30 border border-rose-500/20 p-3 rounded-xl text-sm flex items-center justify-between">
+                             <span className="text-rose-500 font-black">처형됨</span>
+                             <span className="font-bold text-white">{selectedHistory.players.find(p => p.uid === log.executedUid)?.name}</span>
+                          </div>
+                       )}
+                     </div>
+                  )}
                </div>
              );
           })}
-        </div>
-
-        <div>
-          <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest mb-3">개인별 밤 수신 정보 로그</h3>
-          <div className="space-y-3">
-             {selectedHistory.players.filter(p => p.messageHistory && p.messageHistory.length > 0).map(p => (
-               <div key={p.uid} className="bg-slate-950 p-4 rounded-xl border border-slate-800">
-                 <span className="font-bold text-slate-200 text-sm block mb-2">{p.name} ({getRoleName(p.character)})</span>
-                 <ul className="space-y-2">
-                    {p.messageHistory.map((msg, idx) => (
-                       <li key={idx} className="text-xs text-slate-400 bg-slate-900 p-2 rounded whitespace-pre-wrap">{msg}</li>
-                    ))}
-                 </ul>
-               </div>
-             ))}
-          </div>
         </div>
 
       </div>
