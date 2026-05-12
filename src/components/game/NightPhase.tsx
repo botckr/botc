@@ -51,7 +51,7 @@ export function NightPhase({ isST }: { isST: boolean }) {
     if (myRole === 'imp') {
       const aliveMinions = players.filter(mp => !mp.isDead && playerSecret?.evilTeamInfo?.minionNames.includes(mp.name)).length > 0;
       if (p.uid === user.uid) return aliveMinions; // Can only select self if alive minions exist
-      return !p.isDead; // Can only select alive people
+      return true; // Imp can target anyone, including dead players (wasting a kill)
     }
     if (p.uid === user.uid) return false;
     
