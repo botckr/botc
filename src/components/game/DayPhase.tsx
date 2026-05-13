@@ -248,11 +248,17 @@ export function DayPhase({ isST }: { isST: boolean }) {
 
     if (pubClone.status === 'night' || pubClone.status === 'end') {
        secClone.dayLogs = secClone.dayLogs || {};
+       
+       const aliveGood = Object.values(pubClone.players).filter((p: any) => !p.isDead && secClone.players[p.uid]?.alignment === 'good').length;
+       const aliveEvil = Object.values(pubClone.players).filter((p: any) => !p.isDead && secClone.players[p.uid]?.alignment === 'evil').length;
+
        secClone.dayLogs[roomState.dayNumber] = {
           ...secClone.dayLogs[roomState.dayNumber],
           nominations: pubClone.nominationHistory || [],
           executedUid: pubClone.executionTargetUid || null,
-          abilityLogs: secClone.dayLogs[roomState.dayNumber]?.abilityLogs || []
+          abilityLogs: secClone.dayLogs[roomState.dayNumber]?.abilityLogs || [],
+          aliveGood: secClone.dayLogs[roomState.dayNumber]?.aliveGood ?? aliveGood,
+          aliveEvil: secClone.dayLogs[roomState.dayNumber]?.aliveEvil ?? aliveEvil
        };
     }
 
