@@ -283,6 +283,20 @@ export function DayPhase({ isST }: { isST: boolean }) {
     }
 
     if (pubClone.status === 'end') {
+       const winningPlayers = Object.values(pubClone.players).map((p: any) => {
+          const secret = secClone.players[p.uid];
+          return {
+             name: p.name,
+             character: secret?.character || null,
+             originalCharacter: secret?.originalCharacter || null,
+             fakeCharacter: secret?.fakeCharacter || null,
+             isRedHerring: secret?.isRedHerring || false,
+             alignment: secret?.alignment || null
+          };
+       }).filter(p => p.alignment === pubClone.winner);
+       
+       pubClone.winningPlayers = winningPlayers;
+
        const newId = `${Date.now()}_${roomId}`;
        const historyRecord = {
           id: newId,

@@ -196,11 +196,23 @@ function App() {
               </div>
 
               <div className="py-8 bg-slate-950/80 rounded-[2rem] border border-slate-800 shadow-inner px-5">
-                 <p className="text-sm text-slate-200 font-medium leading-relaxed break-keep-all">
+                 <p className="text-sm text-slate-200 font-medium leading-relaxed break-keep-all mb-4">
                     {roomState.winner === 'good' 
                       ? "악마가 처단되었습니다. 마을에 평화가 찾아왔습니다." 
                       : "그림자가 마을을 삼켰습니다. 악의 진영이 승리했습니다."}
                  </p>
+                 {roomState.winningPlayers && roomState.winningPlayers.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-slate-800">
+                       <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3">승리한 플레이어 명단</h3>
+                       <div className="flex flex-wrap gap-2 justify-center">
+                          {roomState.winningPlayers.map(p => (
+                             <span key={p.name} className={`text-xs font-bold px-2 py-1 rounded-md border ${roomState.winner === 'good' ? 'bg-sky-950/30 text-sky-400 border-sky-500/30' : 'bg-rose-950/30 text-rose-400 border-rose-500/30'}`}>
+                                {p.name}
+                             </span>
+                          ))}
+                       </div>
+                    </div>
+                 )}
               </div>
 
               <button 

@@ -39,6 +39,9 @@ export interface GameEvent {
 
 export interface PublicRoomState {
   status: GamePhase;
+  winner?: 'good' | 'evil';
+  winReason?: string;
+  winningPlayers?: { name: string, character: RoleType | null, originalCharacter?: RoleType | null, fakeCharacter?: RoleType | null, isRedHerring?: boolean }[];
   players: Record<string, PublicPlayer>;
   dayNumber: number;
   nominations: Record<string, Nomination> | null;
@@ -48,7 +51,6 @@ export interface PublicRoomState {
   events?: Record<string, GameEvent>;
   usedNominators?: string[]; 
   usedTargets?: string[];
-  winner?: 'good' | 'evil' | null; 
   nominationHistory?: NominationRecord[]; // 오늘 진행된 투표 기록
 }
 

@@ -192,6 +192,20 @@ export function STNightDashboard() {
        newPublicState.status = 'end';
        newPublicState.winner = winResult.winner;
        
+       const winningPlayers = Object.values(newPublicState.players).map((p: any) => {
+          const secret = newSecretState.players[p.uid];
+          return {
+             name: p.name,
+             character: secret?.character || null,
+             originalCharacter: secret?.originalCharacter || null,
+             fakeCharacter: secret?.fakeCharacter || null,
+             isRedHerring: secret?.isRedHerring || false,
+             alignment: secret?.alignment || null
+          };
+       }).filter(p => p.alignment === newPublicState.winner);
+       
+       newPublicState.winningPlayers = winningPlayers;
+       
        const newId = `${Date.now()}_${roomId}`;
        const historyRecord = {
           id: newId,
