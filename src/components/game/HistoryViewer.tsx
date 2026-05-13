@@ -37,6 +37,24 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
     fetchHistories();
   }, []);
 
+  const getFormattedRole = (p: any, evilInfo?: any) => {
+     let orig = p.originalCharacter;
+     if (!orig && evilInfo) {
+        if (p.uid === evilInfo.demonUid) orig = 'imp';
+        if (evilInfo.minionUids?.includes(p.uid) && p.character === 'imp') orig = 'scarlet_woman';
+     }
+
+     let roleText = getRoleName(p.character);
+     if (orig && orig !== p.character && p.character !== 'dead_imp') {
+        roleText = `${getRoleName(orig)} -> ${getRoleName(p.character)}`;
+     } else if (orig && p.character === 'dead_imp') {
+        roleText = `${getRoleName(orig)} -> ${getRoleName('imp')}(사망)`;
+     }
+     
+     if (p.fakeCharacter) roleText = `주정뱅이(착각: ${getRoleName(p.fakeCharacter)})`;
+     return roleText;
+  };
+
   const handleCopyText = async () => {
     if (!selectedHistory) return;
     
@@ -52,13 +70,7 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
 
     text += `[참가자 명단]\n`;
     selectedHistory.players.forEach(p => {
-       let roleText = getRoleName(p.character);
-       if (p.originalCharacter && p.originalCharacter !== p.character && p.character !== 'dead_imp') {
-          roleText = `${getRoleName(p.originalCharacter)} -> ${roleText}`;
-       } else if (p.originalCharacter && p.character === 'dead_imp') {
-          roleText = `${getRoleName(p.originalCharacter)} -> ${getRoleName('imp')}(사망)`;
-       }
-       if (p.fakeCharacter) roleText += ` (가짜: ${getRoleName(p.fakeCharacter)})`;
+       let roleText = getFormattedRole(p, selectedHistory.evilInfo);
        if (p.isRedHerring) roleText += ` (환각 대상)`;
        text += `- ${p.name}: ${roleText}\n`;
     });
@@ -67,24 +79,37 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
     let maxDays = Math.max(...Object.keys(selectedHistory.dayLogs || {}).map(Number), 1);
     
     // messageHistory 길이를 통해 실제 진행된 밤의 횟수를 파악하여 maxDays 보정
-    const maxNights = Math.max(...selectedHistory.players.map(p => p.messageHistory?.length || 0), 1);
+    const maxNights = Math.max(...selectedHistory.players.map(p => {
+       if (!p.messageHistory) return 0;
+       // 뒤쪽에 비어있는 메시지가 있다면 무시하고 실제 의미있는 메시지가 있는 인덱스까지만 계산
+       let realLen = p.messageHistory.length;
+       while (realLen > 0 && !p.messageHistory[realLen - 1]) realLen--;
+       return realLen;
+    }), 1);
+    
     if (maxNights > maxDays) maxDays = maxNights;
     
+    // 만약 게임이 끝났는데 마지막 날짜에 낮 로그도 없고 밤 로그도 없다면 빈 날짜 제거
+    while (maxDays > 1) {
+       const hasDayLog = selectedHistory.dayLogs && selectedHistory.dayLogs[maxDays];
+       const hasNightLog = selectedHistory.players.some(p => p.messageHistory && p.messageHistory[maxDays - 1]);
+       if (!hasDayLog && !hasNightLog) {
+          maxDays--;
+       } else {
+          break;
+       }
+    }
+
     const getSortedNightPlayers = (nightIdx: number) => {
        return [...selectedHistory.players]
           .filter(p => {
              const msg = p.messageHistory?.[nightIdx];
              if (!msg) return false;
-             // 행동과 수신 정보가 모두 '없음'이면 제외
              const lines = msg.split('\n').map(l => l.trim());
              const hasAction = lines.some(l => l.startsWith('행동:') && !l.includes('없음'));
              const hasInfo = lines.some(l => l.startsWith('수신 정보:') && !l.includes('없음'));
-             // 만약 특수한 시스템 메시지라면 포함 (행동/수신정보 포맷이 아닌 경우)
              const isStandardFormat = lines.some(l => l.startsWith('행동:')) && lines.some(l => l.startsWith('수신 정보:'));
-             
-             if (isStandardFormat) {
-                return hasAction || hasInfo;
-             }
+             if (isStandardFormat) return hasAction || hasInfo;
              return true;
           })
           .sort((a, b) => {
@@ -108,8 +133,7 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
        
        if (nightPlayers.length > 0) {
           nightPlayers.forEach(p => {
-             let roleText = p.originalCharacter && p.originalCharacter !== p.character && p.character !== 'dead_imp' ? `${getRoleName(p.originalCharacter)} -> ${getRoleName(p.character)}` : (p.originalCharacter && p.character === 'dead_imp' ? `${getRoleName(p.originalCharacter)} -> ${getRoleName('imp')}(사망)` : getRoleName(p.character));
-             if (p.fakeCharacter) roleText = `주정뱅이(착각: ${getRoleName(p.fakeCharacter)})`;
+             let roleText = getFormattedRole(p, selectedHistory.evilInfo);
              if (p.isRedHerring) roleText += ` (환각 대상)`;
              text += `- ${p.name}(${roleText}):\n  ${formatNightMessage(p.messageHistory[nightIdx])}\n`;
           });
@@ -240,8 +264,7 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
                  <span className="flex items-center gap-1">
                     {p.isRedHerring && <span className="text-[10px] text-rose-300 bg-rose-950/50 px-2 py-1 rounded-full border border-rose-900/50">환각 대상</span>}
                     <span className="text-xs text-slate-400 bg-slate-800 px-2 py-1 rounded-full">
-                       {p.originalCharacter && p.originalCharacter !== p.character && p.character !== 'dead_imp' ? `${getRoleName(p.originalCharacter)} -> ${getRoleName(p.character)}` : (p.originalCharacter && p.character === 'dead_imp' ? `${getRoleName(p.originalCharacter)} -> ${getRoleName('imp')}(사망)` : getRoleName(p.character))}
-                       {p.fakeCharacter && <span className="text-amber-500 ml-1">({getRoleName(p.fakeCharacter)})</span>}
+                       {getFormattedRole(p, selectedHistory.evilInfo)}
                     </span>
                  </span>
                </div>
@@ -263,7 +286,7 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
                         {nightPlayers.length > 0 ? nightPlayers.map(p => (
                            <div key={p.uid} className="bg-slate-950/50 p-3 rounded-xl border border-slate-800">
                               <span className="font-bold text-indigo-300 text-xs block mb-1">
-                                {p.name} ({p.fakeCharacter ? `주정뱅이-착각: ${getRoleName(p.fakeCharacter)}` : (p.originalCharacter && p.originalCharacter !== p.character && p.character !== 'dead_imp' ? `${getRoleName(p.originalCharacter)} -> ${getRoleName(p.character)}` : (p.originalCharacter && p.character === 'dead_imp' ? `${getRoleName(p.originalCharacter)} -> ${getRoleName('imp')}(사망)` : getRoleName(p.character)))}){p.isRedHerring && <span className="text-rose-300 ml-1">(환각 대상)</span>}
+                                {p.name} ({getFormattedRole(p, selectedHistory.evilInfo)}){p.isRedHerring && <span className="text-rose-300 ml-1">(환각 대상)</span>}
                               </span>
                               <div className="text-xs text-slate-400 whitespace-pre-wrap pl-2 border-l-2 border-slate-700">
                                  {formatNightMessage(p.messageHistory[nightIdx])}
