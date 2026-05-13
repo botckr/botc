@@ -172,7 +172,7 @@ export function TownSquare() {
     : (lastHistory?.voterUids || []);
 
   const handlePlayerClick = async (clickedUid: string) => {
-    if (role !== 'st' || isVoting || roomState.status === 'end') return;
+    if (role !== 'st' || roomState?.status === 'end' || isVoting) return;
 
     const clickedPlayer = roomState.players[clickedUid];
     if (clickedPlayer.isDead && !selectedNominator) return; // Dead can't nominate
@@ -275,14 +275,24 @@ export function TownSquare() {
                  } else {
                     pubClone.status = 'night';
                     pubClone.dayNumber += 1;
-                    pubClone.usedNominators = [];
-                    pubClone.usedTargets = [];
-                    pubClone.nominationHistory = [];
+                    
+                    updates[`public/rooms/${roomId}/usedNominators`] = [];
+                    updates[`public/rooms/${roomId}/usedTargets`] = [];
+                    updates[`public/rooms/${roomId}/nominationHistory`] = [];
                  }
 
-                 updates[`public/rooms/${roomId}`] = pubClone;
-                 updates[`secret/rooms/${roomId}/players`] = secClone.players;
-                 updates[`secret/rooms/${roomId}/dayLogs`] = secClone.dayLogs;
+                 updates[`public/rooms/${roomId}/status`] = pubClone.status;
+                 if (pubClone.status === 'night') {
+                    updates[`public/rooms/${roomId}/dayNumber`] = pubClone.dayNumber;
+                 } else if (pubClone.status === 'end') {
+                    updates[`public/rooms/${roomId}/winner`] = pubClone.winner;
+                 }
+                 
+                 updates[`public/rooms/${roomId}/players/${selectedNominator}/isDead`] = true;
+                 updates[`public/rooms/${roomId}/players/${selectedNominator}/hasGhostVote`] = true;
+                 updates[`public/rooms/${roomId}/lastExecutedUid`] = selectedNominator;
+
+                 updates[`secret/rooms/${roomId}`] = secClone;
                  alert(`처녀(Virgin) 능력이 발동되었습니다! 지목자 ${roomState.players[selectedNominator].name}님이 즉시 처형됩니다.`);
               }
            }

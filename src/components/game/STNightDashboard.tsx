@@ -178,10 +178,11 @@ export function STNightDashboard() {
     const nightDeaths = Object.keys(newPublicState.players).filter(uid => newPublicState.players[uid].isDead && !roomState.players[uid].isDead).map(uid => newPublicState.players[uid].name);
 
     newSecretState.dayLogs = newSecretState.dayLogs || {};
-    newSecretState.dayLogs[roomState.dayNumber + 1] = {
-       nominations: [],
-       executedUid: null,
-       abilityLogs: [],
+    newSecretState.dayLogs[roomState.dayNumber] = {
+       ...newSecretState.dayLogs[roomState.dayNumber],
+       nominations: newSecretState.dayLogs[roomState.dayNumber]?.nominations || [],
+       executedUid: newSecretState.dayLogs[roomState.dayNumber]?.executedUid || null,
+       abilityLogs: newSecretState.dayLogs[roomState.dayNumber]?.abilityLogs || [],
        aliveGood,
        aliveEvil,
        nightDeaths

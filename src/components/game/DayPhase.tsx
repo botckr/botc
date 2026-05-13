@@ -96,7 +96,16 @@ export function DayPhase({ isST }: { isST: boolean }) {
           pubClone.events[eventId].status = success ? 'dead' : 'miss';
        }
        
-       updates[`public/rooms/${roomId}`] = pubClone;
+       updates[`public/rooms/${roomId}/events/${eventId}/status`] = success ? 'dead' : 'miss';
+       if (success) {
+          updates[`public/rooms/${roomId}/players/${targetUid}/isDead`] = true;
+          updates[`public/rooms/${roomId}/players/${targetUid}/hasGhostVote`] = true;
+          if (pubClone.status === 'end') {
+             updates[`public/rooms/${roomId}/status`] = 'end';
+             updates[`public/rooms/${roomId}/winner`] = pubClone.winner;
+             updates[`public/rooms/${roomId}/winReason`] = pubClone.winReason;
+          }
+       }
        updates[`secret/rooms/${roomId}/players`] = secClone.players;
        updates[`secret/rooms/${roomId}/dayLogs`] = secClone.dayLogs;
     }
@@ -285,7 +294,9 @@ export function DayPhase({ isST }: { isST: boolean }) {
              uid: p.uid,
              name: p.name,
              character: secClone.players[p.uid]?.character || null,
+             originalCharacter: secClone.players[p.uid]?.originalCharacter || null,
              fakeCharacter: secClone.players[p.uid]?.fakeCharacter || null,
+             isRedHerring: secClone.players[p.uid]?.isRedHerring || false,
              messageHistory: secClone.players[p.uid]?.messageHistory || []
           })),
           dayLogs: secClone.dayLogs
@@ -294,14 +305,25 @@ export function DayPhase({ isST }: { isST: boolean }) {
     }
 
     if (pubClone.status === 'night') {
-       pubClone.highestVotes = 0;
-       pubClone.executionTargetUid = null;
-       pubClone.usedNominators = [];
-       pubClone.usedTargets = [];
-       pubClone.nominationHistory = [];
+       updates[`public/rooms/${roomId}/highestVotes`] = 0;
+       updates[`public/rooms/${roomId}/executionTargetUid`] = null;
+       updates[`public/rooms/${roomId}/usedNominators`] = [];
+       updates[`public/rooms/${roomId}/usedTargets`] = [];
+       updates[`public/rooms/${roomId}/nominationHistory`] = [];
     }
 
-    updates[`public/rooms/${roomId}`] = pubClone;
+    updates[`public/rooms/${roomId}/status`] = pubClone.status;
+    updates[`public/rooms/${roomId}/dayNumber`] = pubClone.dayNumber;
+    if (pubClone.status === 'end') {
+       updates[`public/rooms/${roomId}/winner`] = pubClone.winner;
+       updates[`public/rooms/${roomId}/winReason`] = pubClone.winReason;
+    }
+    if (targetUid) {
+       updates[`public/rooms/${roomId}/players/${targetUid}/isDead`] = true;
+       updates[`public/rooms/${roomId}/players/${targetUid}/hasGhostVote`] = true;
+       updates[`public/rooms/${roomId}/lastExecutedUid`] = targetUid;
+    }
+
     updates[`secret/rooms/${roomId}`] = secClone;
     await update(ref(database), updates);
   };
