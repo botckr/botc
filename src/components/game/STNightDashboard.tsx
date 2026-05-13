@@ -159,7 +159,13 @@ export function STNightDashboard() {
 
        if (newPublicState.players[impUid]?.isDead) {
           const isStarpass = impAction?.targetUid === impUid;
-          handleDemonDeath(newPublicState, newSecretState, isStarpass, impUid);
+          const inherited = handleDemonDeath(newPublicState, newSecretState, isStarpass, impUid);
+          if (inherited) {
+             const impMsgHist = newSecretState.players[impUid].messageHistory;
+             if (impMsgHist && impMsgHist.length > 0) {
+                impMsgHist[impMsgHist.length - 1] += `\n  ※ [시스템] 조건 충족으로 새로운 악마(임프)가 계승되었습니다.`;
+             }
+          }
        }
     }
 

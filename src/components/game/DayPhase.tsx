@@ -59,6 +59,11 @@ export function DayPhase({ isST }: { isST: boolean }) {
        secClone.dayLogs[roomState.dayNumber].abilityLogs.push(`${actorSecret?.fakeCharacter === 'slayer' ? '주정뱅이(착각: 슬레이어)' : '슬레이어'} 능력 발동: ${roomState.players[targetUid]?.name} -> ${success ? '명중(DEAD)' : '빗나감(MISS)'}`);
 
        if (success) {
+          const inherited = handleDemonDeath(pubClone, secClone, false, targetUid);
+          if (inherited) {
+             secClone.dayLogs[roomState.dayNumber].abilityLogs.push(`※ [시스템] 조건 충족으로 새로운 악마(임프)가 계승되었습니다.`);
+          }
+          
           const winResult = checkWinCondition(pubClone, secClone);
           if (winResult) {
              pubClone.status = 'end';
@@ -210,7 +215,13 @@ export function DayPhase({ isST }: { isST: boolean }) {
        pubClone.lastExecutedUid = targetUid;
        
        if (targetSecret?.character === 'imp') {
-          handleDemonDeath(pubClone, secClone, false, targetUid);
+          const inherited = handleDemonDeath(pubClone, secClone, false, targetUid);
+          if (inherited) {
+             secClone.dayLogs = secClone.dayLogs || {};
+             secClone.dayLogs[roomState.dayNumber] = secClone.dayLogs[roomState.dayNumber] || { nominations: [], executedUid: null, abilityLogs: [] };
+             secClone.dayLogs[roomState.dayNumber].abilityLogs = secClone.dayLogs[roomState.dayNumber].abilityLogs || [];
+             secClone.dayLogs[roomState.dayNumber].abilityLogs.push(`※ [시스템] 조건 충족으로 새로운 악마(임프)가 계승되었습니다.`);
+          }
        }
 
        if (targetSecret?.character === 'saint' && !targetSecret.isPoisoned && !targetSecret.isDrunk) {

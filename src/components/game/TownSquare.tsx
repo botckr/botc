@@ -230,7 +230,13 @@ export function TownSquare() {
                  secClone.players[clickedUid].isUsed = true; // Set isUsed in clone
 
                  if (secClone.players[selectedNominator]?.character === 'imp') {
-                    handleDemonDeath(pubClone, secClone, false, selectedNominator);
+                    const inherited = handleDemonDeath(pubClone, secClone, false, selectedNominator);
+                    if (inherited) {
+                       secClone.dayLogs = secClone.dayLogs || {};
+                       secClone.dayLogs[roomState.dayNumber] = secClone.dayLogs[roomState.dayNumber] || { nominations: [], executedUid: null, abilityLogs: [] };
+                       secClone.dayLogs[roomState.dayNumber].abilityLogs = secClone.dayLogs[roomState.dayNumber].abilityLogs || [];
+                       secClone.dayLogs[roomState.dayNumber].abilityLogs.push(`※ [시스템] 조건 충족으로 새로운 악마(임프)가 계승되었습니다.`);
+                    }
                  }
 
                  const winResult = checkWinCondition(pubClone, secClone);
