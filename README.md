@@ -63,4 +63,4 @@ Firebase 콘솔의 Realtime Database 데이터 탭에서 직접 루트 아래에
 * **"Blood on the Clocktower"** is a trademark of Steven Medway and The Pandemonium Institute.
 * 이 애플리케이션은 영리적 목적이 없는 **비공식 팬메이드(Unofficial Fan-made) 프로젝트**이며, The Pandemonium Institute와 공식적인 제휴나 연관이 없습니다.
 * 게임의 룰, 캐릭터 디자인, 명칭 등에 대한 모든 원저작권은 [The Pandemonium Institute](https://bloodontheclocktower.com/)에 있습니다. 보드게임의 진정한 재미를 느끼기 위해 반드시 공식 오프라인 실물 패키지를 구매하여 즐기시기를 강력히 권장합니다.
-* **Built with AI**: 이 애플리케이션의 기획, 로직 설계 및 코딩의 100%는 구글의 생성형 AI **[Google Gemini (Gemini 2.5 Pro / Flash) & Gemini CLI]**와의 대화형 협업을 통해 작성되었습니다.
+* **Built with AI**: 이 애플리케이션의 기획, 로직 설계 및 코딩의 100%는 구글의 생성형 AI **Google Gemini** 와의 대화형 협업을 통해 작성되었습니다.
