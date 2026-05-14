@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { database } from '../../lib/firebase';
-import { ref, get } from 'firebase/database';
+import { ref, get, query, orderByChild, limitToLast, endBefore } from 'firebase/database';
 import { Button } from '../ui/Button';
 import { getRoleName } from '../../constants/roles';
 import type { GameHistory } from '../../types/game';
@@ -12,21 +12,29 @@ const NIGHT_ORDER = [
   'undertaker', 'empath', 'fortune_teller', 'butler', 'spy'
 ];
 
+const PAGE_SIZE = 10;
+
 export function HistoryViewer({ onClose }: { onClose: () => void }) {
   const [histories, setHistories] = useState<GameHistory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [selectedHistory, setSelectedHistory] = useState<GameHistory | null>(null);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const fetchHistories = async () => {
       try {
-        const snapshot = await get(ref(database, 'history'));
+        const historyQuery = query(ref(database, 'history'), orderByChild('timestamp'), limitToLast(PAGE_SIZE));
+        const snapshot = await get(historyQuery);
         if (snapshot.exists()) {
           const data = snapshot.val();
           const parsed = Object.values(data) as GameHistory[];
           parsed.sort((a, b) => b.timestamp - a.timestamp);
           setHistories(parsed);
+          if (parsed.length < PAGE_SIZE) setHasMore(false);
+        } else {
+          setHasMore(false);
         }
       } catch (e) {
         console.error("Failed to fetch histories:", e);
@@ -36,6 +44,29 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
     };
     fetchHistories();
   }, []);
+
+  const handleLoadMore = async () => {
+    if (histories.length === 0 || !hasMore) return;
+    setLoadingMore(true);
+    try {
+      const oldestTimestamp = histories[histories.length - 1].timestamp;
+      const historyQuery = query(ref(database, 'history'), orderByChild('timestamp'), endBefore(oldestTimestamp), limitToLast(PAGE_SIZE));
+      const snapshot = await get(historyQuery);
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const parsed = Object.values(data) as GameHistory[];
+        parsed.sort((a, b) => b.timestamp - a.timestamp);
+        setHistories(prev => [...prev, ...parsed]);
+        if (parsed.length < PAGE_SIZE) setHasMore(false);
+      } else {
+        setHasMore(false);
+      }
+    } catch (e) {
+      console.error("Failed to load more histories:", e);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const getFormattedRole = (p: any, evilInfo?: any) => {
      let orig = p.originalCharacter;
@@ -408,6 +439,16 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
                  </div>
                </div>
             ))}
+            {hasMore && (
+               <Button 
+                 variant="secondary" 
+                 onClick={handleLoadMore} 
+                 disabled={loadingMore}
+                 className="w-full mt-2 text-xs font-bold text-slate-400"
+               >
+                 {loadingMore ? '불러오는 중...' : '이전 기록 더보기'}
+               </Button>
+            )}
          </div>
       )}
     </div>
