@@ -104,6 +104,7 @@ export function DayPhase({ isST }: { isST: boolean }) {
              updates[`public/rooms/${roomId}/status`] = 'end';
              updates[`public/rooms/${roomId}/winner`] = pubClone.winner;
              updates[`public/rooms/${roomId}/winReason`] = pubClone.winReason;
+             updates[`public/rooms/${roomId}/winningPlayers`] = pubClone.winningPlayers;
           }
        }
        updates[`secret/rooms/${roomId}/players`] = secClone.players;
@@ -331,6 +332,7 @@ export function DayPhase({ isST }: { isST: boolean }) {
     if (pubClone.status === 'end') {
        updates[`public/rooms/${roomId}/winner`] = pubClone.winner;
        updates[`public/rooms/${roomId}/winReason`] = pubClone.winReason;
+       updates[`public/rooms/${roomId}/winningPlayers`] = pubClone.winningPlayers;
     }
     if (targetUid) {
        updates[`public/rooms/${roomId}/players/${targetUid}/isDead`] = true;

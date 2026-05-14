@@ -113,6 +113,7 @@ const PlayerToken = memo(({
              </span>
              
              <div className="flex gap-1 mt-1 flex-wrap justify-center">
+                {secret?.isRedHerring && <span className="text-[10px] font-black bg-rose-950/80 text-rose-300 border border-rose-900/50 px-1.5 py-0.5 rounded shadow-sm uppercase">환각</span>}
                 {isPoisoned && <span className="text-xs font-black bg-purple-600 text-white px-1.5 py-0.5 rounded shadow-sm uppercase">Psn</span>}
                 {isDrunk && <span className="text-xs font-black bg-amber-600 text-slate-950 px-1.5 py-0.5 rounded shadow-sm uppercase">Drk</span>}
                 {isUsed && <span className="text-xs font-black bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded shadow-sm uppercase">Used</span>}
@@ -300,6 +301,8 @@ export function TownSquare() {
                     updates[`public/rooms/${roomId}/dayNumber`] = pubClone.dayNumber;
                  } else if (pubClone.status === 'end') {
                     updates[`public/rooms/${roomId}/winner`] = pubClone.winner;
+                    updates[`public/rooms/${roomId}/winReason`] = pubClone.winReason;
+                    updates[`public/rooms/${roomId}/winningPlayers`] = pubClone.winningPlayers;
                  }
                  
                  updates[`public/rooms/${roomId}/players/${selectedNominator}/isDead`] = true;
