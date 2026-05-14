@@ -1,6 +1,6 @@
 # 🩸 Blood on the Clocktower - Digital Grimoire (시계탑에 흐른 피)
 
-오프라인 마피아 보드게임 ** "시계탑에 흐른 피 (Blood on the Clocktower)"**의 **Trouble Brewing (초보자용) ** 시나리오를 스마트폰과 웹을 통해 즐길 수 있도록 제작된 **비동기식 디지털 마도서 및 플레이어 클라이언트**입니다.
+오프라인 마피아 보드게임 **시계탑에 흐른 피 (Blood on the Clocktower)**의 **Trouble Brewing (초보자용) ** 시나리오를 스마트폰과 웹을 통해 즐길 수 있도록 제작된 **비동기식 디지털 마도서 및 플레이어 클라이언트**입니다.
 
 스토리텔러(ST)의 수고를 덜어주는 강력한 자동화 기능과, 100% 모바일 친화적인 다크 고딕 UI를 제공합니다.
 
