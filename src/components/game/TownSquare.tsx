@@ -369,7 +369,7 @@ export function TownSquare() {
       {/* Help Modal */}
       {isHelpOpen && (
         <div className="fixed inset-0 z-[200] bg-slate-950/95 backdrop-blur-md overflow-y-auto flex flex-col items-center p-4 sm:p-8 animate-fade-in">
-          <div className="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-2xl relative mb-10">
+          <div className="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-2xl relative mb-10 select-text">
              <button 
                onClick={() => setIsHelpOpen(false)}
                className="absolute top-6 right-6 w-8 h-8 bg-slate-800 text-slate-400 rounded-full flex items-center justify-center font-black hover:bg-rose-600 hover:text-white transition-colors"
