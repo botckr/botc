@@ -268,7 +268,7 @@ export function STNightDashboard() {
                return (
                  <div key={p.uid} className="flex justify-between items-center bg-slate-950/60 p-4 rounded-2xl border border-slate-800/50 shadow-inner group">
                     <div className="flex flex-col">
-                       <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">{getRoleName(role)}</span>
+                       <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">{getRoleName(role)}{secretState.players[p.uid]?.isRedHerring && <span className="text-rose-400 ml-1">(환각 대상)</span>}</span>
                        <span className="text-sm font-black text-slate-200">{p.name}</span>
                     </div>
                     <div className="text-right">
@@ -362,6 +362,7 @@ export function STNightDashboard() {
                           </span>
                        </div>
                        <div className="flex gap-1.5">
+                          {secret?.isRedHerring && <span className="text-xs bg-rose-950 text-rose-300 border border-rose-900/50 px-2 py-0.5 rounded-full font-black uppercase shadow-sm">환각 대상</span>}
                           {secret?.character === 'dead_imp' && <span className="text-xs bg-rose-950 text-rose-500 border border-rose-900/50 px-2 py-0.5 rounded-full font-black uppercase shadow-sm">구 임프</span>}
                           {secret?.character === 'imp' && <span className="text-xs bg-rose-600 text-white border border-rose-500 px-2 py-0.5 rounded-full font-black uppercase shadow-sm animate-pulse">현 임프</span>}
                           {secret?.isUsed && <span className="text-xs bg-slate-800 text-slate-400 border border-slate-700 px-2 py-0.5 rounded-full font-black uppercase shadow-sm">사용됨</span>}
