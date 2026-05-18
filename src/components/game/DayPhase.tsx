@@ -70,6 +70,18 @@ export function DayPhase({ isST }: { isST: boolean }) {
              pubClone.winner = winResult.winner;
              pubClone.winReason = winResult.reason;
              
+             pubClone.winningPlayers = Object.values(pubClone.players).map((p: any) => {
+                const secret = secClone.players[p.uid];
+                return {
+                   name: p.name,
+                   character: secret?.character || null,
+                   originalCharacter: secret?.originalCharacter || null,
+                   fakeCharacter: secret?.fakeCharacter || null,
+                   isRedHerring: secret?.isRedHerring || false,
+                   alignment: secret?.alignment || null
+                };
+             }).filter((p: any) => p.alignment === pubClone.winner);
+             
              const newId = `${Date.now()}_${roomId}`;
              const historyRecord = {
                 id: newId,
