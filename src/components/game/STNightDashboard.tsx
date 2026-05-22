@@ -246,6 +246,16 @@ export function STNightDashboard() {
 
   const actions = secretState.nightActions || {};
 
+  const isNight1 = roomState.dayNumber === 1;
+  const allActionsCompleted = players.filter(p => !p.isDead).every(p => {
+    const role = secretState.players[p.uid]?.character;
+    const needsTarget = ['poisoner'].includes(role || '') || (role === 'ravenkeeper' && !isNight1) || (role === 'imp' && !isNight1) || (role === 'monk' && !isNight1);
+    const needsTwoTargets = ['fortune_teller'].includes(role || '');
+    const isButler = role === 'butler';
+    if (!needsTarget && !needsTwoTargets && !isButler) return true;
+    return actions[p.uid]?.status === 'completed';
+  });
+
   return (
     <div className="w-full space-y-12 animate-fade-in pb-24 px-0 sm:px-0">
       <TownSquare />
@@ -339,7 +349,8 @@ export function STNightDashboard() {
             <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.4em]">개별 정보 메시지 작성</h3>
             <button 
                onClick={generateAutoSuggestions}
-               className="text-xs font-black bg-sky-500 text-slate-950 px-4 py-1.5 rounded-full hover:bg-sky-400 transition-all active:scale-95 shadow-lg shadow-sky-950/40 uppercase tracking-tighter"
+               disabled={!allActionsCompleted}
+               className="text-xs font-black bg-sky-500 text-slate-950 px-4 py-1.5 rounded-full hover:bg-sky-400 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-sky-500 transition-all active:scale-95 shadow-lg shadow-sky-950/40 uppercase tracking-tighter"
             >
                자동 제안 생성
             </button>
