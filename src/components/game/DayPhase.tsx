@@ -278,22 +278,28 @@ export function DayPhase({ isST }: { isST: boolean }) {
              await update(ref(database), updates);
              return;
           }
-       }
 
-       const winResult = checkWinCondition(pubClone, secClone);
-       if (winResult) {
-          pubClone.status = 'end';
-          pubClone.winner = winResult.winner;
-          pubClone.winReason = winResult.reason;
-       } else {
-          pubClone.status = 'night';
-          pubClone.dayNumber += 1;
+          const winResult = checkWinCondition(pubClone, secClone);
+          if (winResult) {
+             pubClone.status = 'end';
+             pubClone.winner = winResult.winner;
+             pubClone.winReason = winResult.reason;
+          } else {
+             pubClone.status = 'night';
+             pubClone.dayNumber += 1;
+          }
        }
-    } else {
+    }
+    
+    // Check for Mayor win if NO ONE was executed today (either no nomination tied, or Mayor survived and no substitute died)
+    // We can know this if status is still 'day' (not set to night or end by an execution)
+    // Wait, pubClone.status was 'day' before this function.
+    // If no one was executed, targetUid is null OR finalExecutionUid was null (which we can check via pubClone.lastExecutedUid not being updated today... actually let's just check if we didn't transition yet)
+    if (!targetUid || (targetUid && pubClone.status === 'day')) {
        const finalAlive = players.filter(p => !p.isDead);
        const isMayorAlive = finalAlive.some(p => secClone.players[p.uid]?.character === 'mayor');
        if (finalAlive.length === 3 && isMayorAlive) {
-          if (window.confirm("시장 승리 조건 충족. 게임을 종료할까요?")) {
+          if (window.confirm("시장 승리 조건 충족(오늘 아무도 처형되지 않음). 게임을 종료할까요?")) {
              pubClone.status = 'end';
              pubClone.winner = 'good';
              pubClone.winReason = '시장 생존 (생존자 3인 남음)';
