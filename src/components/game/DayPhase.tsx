@@ -230,9 +230,9 @@ export function DayPhase({ isST }: { isST: boolean }) {
     const targetUid = pubClone.executionTargetUid;
     const targetSecret = targetUid ? secClone.players[targetUid] : null;
     const updates: Record<string, any> = {};
+    let finalExecutionUid: string | null = targetUid;
 
     if (targetUid) {
-       let finalExecutionUid: string | null = targetUid;
        if (targetSecret?.character === 'mayor' && !targetSecret.isPoisoned && !targetSecret.isDrunk) {
           const alivePlayers = Object.values(pubClone.players).filter((p: any) => !p.isDead && p.uid !== targetUid);
           let promptText = `처형 대상이 시장(${roomState.players[targetUid].name})입니다.\n시장의 능력으로 다른 플레이어를 대신 처형하려면 아래 번호를 입력하세요.\n아무도 죽지 않게 하려면 0을, 시장 본인이 그대로 처형되게 하려면 아무것도 입력하지 않고 '확인'을 누르거나 '취소'를 누르세요.\n\n0: 아무도 처형하지 않음 (생존)\n`;
@@ -380,10 +380,10 @@ export function DayPhase({ isST }: { isST: boolean }) {
        updates[`public/rooms/${roomId}/winReason`] = pubClone.winReason;
        updates[`public/rooms/${roomId}/winningPlayers`] = pubClone.winningPlayers;
     }
-    if (targetUid) {
-       updates[`public/rooms/${roomId}/players/${targetUid}/isDead`] = true;
-       updates[`public/rooms/${roomId}/players/${targetUid}/hasGhostVote`] = true;
-       updates[`public/rooms/${roomId}/lastExecutedUid`] = targetUid;
+    if (finalExecutionUid) {
+       updates[`public/rooms/${roomId}/players/${finalExecutionUid}/isDead`] = true;
+       updates[`public/rooms/${roomId}/players/${finalExecutionUid}/hasGhostVote`] = true;
+       updates[`public/rooms/${roomId}/lastExecutedUid`] = finalExecutionUid;
     }
 
     updates[`secret/rooms/${roomId}`] = secClone;
