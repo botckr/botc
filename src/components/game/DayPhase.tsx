@@ -232,20 +232,35 @@ export function DayPhase({ isST }: { isST: boolean }) {
     const updates: Record<string, any> = {};
 
     if (targetUid) {
-       let actuallyDies = true;
+       let finalExecutionUid: string | null = targetUid;
        if (targetSecret?.character === 'mayor' && !targetSecret.isPoisoned && !targetSecret.isDrunk) {
-          if (window.confirm(`처형 대상이 시장(${roomState.players[targetUid].name})입니다.\n시장의 능력으로 처형을 면하고 생존하시겠습니까? (취소를 누르면 정상적으로 처형됩니다)\n※ 주의: 시장이 생존할 경우, 필요한 경우 ST가 다른 플레이어를 수동으로 처형해야 할 수 있습니다.`)) {
-             actuallyDies = false;
+          const alivePlayers = Object.values(pubClone.players).filter((p: any) => !p.isDead && p.uid !== targetUid);
+          let promptText = `처형 대상이 시장(${roomState.players[targetUid].name})입니다.\n시장의 능력으로 다른 플레이어를 대신 처형하려면 아래 번호를 입력하세요.\n아무도 죽지 않게 하려면 0을, 시장 본인이 그대로 처형되게 하려면 아무것도 입력하지 않고 '확인'을 누르거나 '취소'를 누르세요.\n\n0: 아무도 처형하지 않음 (생존)\n`;
+          alivePlayers.forEach((p: any, idx: number) => {
+             promptText += `${idx + 1}: ${p.name}\n`;
+          });
+          const result = window.prompt(promptText);
+          
+          if (result !== null && result.trim() !== '') {
+             const choice = parseInt(result.trim());
+             if (choice === 0) {
+                finalExecutionUid = null;
+                alert(`아무도 처형되지 않고 밤이 됩니다.`);
+             } else if (choice > 0 && choice <= alivePlayers.length) {
+                finalExecutionUid = (alivePlayers[choice - 1] as any).uid;
+                alert(`시장 대신 ${(alivePlayers[choice - 1] as any).name} 님이 처형됩니다.`);
+             }
           }
        }
 
-       if (actuallyDies) {
-          pubClone.players[targetUid].isDead = true;
-          pubClone.players[targetUid].hasGhostVote = true;
-          pubClone.lastExecutedUid = targetUid;
+       if (finalExecutionUid) {
+          const finalSecret = secClone.players[finalExecutionUid];
+          pubClone.players[finalExecutionUid].isDead = true;
+          pubClone.players[finalExecutionUid].hasGhostVote = true;
+          pubClone.lastExecutedUid = finalExecutionUid;
           
-          if (targetSecret?.character === 'imp') {
-             const inherited = handleDemonDeath(pubClone, secClone, false, targetUid);
+          if (finalSecret?.character === 'imp') {
+             const inherited = handleDemonDeath(pubClone, secClone, false, finalExecutionUid);
              if (inherited) {
                 secClone.dayLogs = secClone.dayLogs || {};
                 secClone.dayLogs[roomState.dayNumber] = secClone.dayLogs[roomState.dayNumber] || { nominations: [], executedUid: null, abilityLogs: [] };
@@ -254,7 +269,7 @@ export function DayPhase({ isST }: { isST: boolean }) {
              }
           }
 
-          if (targetSecret?.character === 'saint' && !targetSecret.isPoisoned && !targetSecret.isDrunk) {
+          if (finalSecret?.character === 'saint' && !finalSecret.isPoisoned && !finalSecret.isDrunk) {
              pubClone.status = 'end';
              pubClone.winner = 'evil';
              pubClone.winReason = '성자 처형';
