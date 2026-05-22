@@ -192,11 +192,11 @@ export function DayPhase({ isST }: { isST: boolean }) {
     const currentHighest = roomState.highestVotes || 0;
     const updates: Record<string, any> = {};
 
-    const voterNames = Object.entries(currentNomination.voters)
+    const voterNames = Object.entries(currentNomination.voters || {})
       .filter(([_, voted]) => voted === true)
       .map(([uid]) => roomState.players[uid]?.name || "Unknown");
 
-    const voterUids = Object.entries(currentNomination.voters)
+    const voterUids = Object.entries(currentNomination.voters || {})
       .filter(([_, voted]) => voted === true)
       .map(([uid]) => uid);
 
@@ -232,34 +232,47 @@ export function DayPhase({ isST }: { isST: boolean }) {
     const updates: Record<string, any> = {};
 
     if (targetUid) {
-       pubClone.players[targetUid].isDead = true;
-       pubClone.players[targetUid].hasGhostVote = true;
-       pubClone.lastExecutedUid = targetUid;
-       
-       if (targetSecret?.character === 'imp') {
-          const inherited = handleDemonDeath(pubClone, secClone, false, targetUid);
-          if (inherited) {
-             secClone.dayLogs = secClone.dayLogs || {};
-             secClone.dayLogs[roomState.dayNumber] = secClone.dayLogs[roomState.dayNumber] || { nominations: [], executedUid: null, abilityLogs: [] };
-             secClone.dayLogs[roomState.dayNumber].abilityLogs = secClone.dayLogs[roomState.dayNumber].abilityLogs || [];
-             secClone.dayLogs[roomState.dayNumber].abilityLogs.push(`※ [시스템] 조건 충족으로 새로운 악마(임프)가 계승되었습니다.`);
+       let actuallyDies = true;
+       if (targetSecret?.character === 'mayor' && !targetSecret.isPoisoned && !targetSecret.isDrunk) {
+          if (window.confirm(`처형 대상이 시장(${roomState.players[targetUid].name})입니다.\n시장의 능력으로 처형을 면하고 생존하시겠습니까? (취소를 누르면 정상적으로 처형됩니다)\n※ 주의: 시장이 생존할 경우, 필요한 경우 ST가 다른 플레이어를 수동으로 처형해야 할 수 있습니다.`)) {
+             actuallyDies = false;
           }
        }
 
-       if (targetSecret?.character === 'saint' && !targetSecret.isPoisoned && !targetSecret.isDrunk) {
-          pubClone.status = 'end';
-          pubClone.winner = 'evil';
-          pubClone.winReason = '성자 처형';
-       } else {
-          const winResult = checkWinCondition(pubClone, secClone);
-          if (winResult) {
-             pubClone.status = 'end';
-             pubClone.winner = winResult.winner;
-             pubClone.winReason = winResult.reason;
-          } else {
-             pubClone.status = 'night';
-             pubClone.dayNumber += 1;
+       if (actuallyDies) {
+          pubClone.players[targetUid].isDead = true;
+          pubClone.players[targetUid].hasGhostVote = true;
+          pubClone.lastExecutedUid = targetUid;
+          
+          if (targetSecret?.character === 'imp') {
+             const inherited = handleDemonDeath(pubClone, secClone, false, targetUid);
+             if (inherited) {
+                secClone.dayLogs = secClone.dayLogs || {};
+                secClone.dayLogs[roomState.dayNumber] = secClone.dayLogs[roomState.dayNumber] || { nominations: [], executedUid: null, abilityLogs: [] };
+                secClone.dayLogs[roomState.dayNumber].abilityLogs = secClone.dayLogs[roomState.dayNumber].abilityLogs || [];
+                secClone.dayLogs[roomState.dayNumber].abilityLogs.push(`※ [시스템] 조건 충족으로 새로운 악마(임프)가 계승되었습니다.`);
+             }
           }
+
+          if (targetSecret?.character === 'saint' && !targetSecret.isPoisoned && !targetSecret.isDrunk) {
+             pubClone.status = 'end';
+             pubClone.winner = 'evil';
+             pubClone.winReason = '성자 처형';
+             updates[`public/rooms/${roomId}`] = pubClone;
+             updates[`secret/rooms/${roomId}`] = secClone;
+             await update(ref(database), updates);
+             return;
+          }
+       }
+
+       const winResult = checkWinCondition(pubClone, secClone);
+       if (winResult) {
+          pubClone.status = 'end';
+          pubClone.winner = winResult.winner;
+          pubClone.winReason = winResult.reason;
+       } else {
+          pubClone.status = 'night';
+          pubClone.dayNumber += 1;
        }
     } else {
        const finalAlive = players.filter(p => !p.isDead);
