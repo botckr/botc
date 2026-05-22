@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { usePlayerSecretData, useSecretData } from '../../hooks/useFirebaseSync';
 import { database } from '../../lib/firebase';
@@ -14,6 +15,7 @@ export function DayPhase({ isST }: { isST: boolean }) {
   const { roomId, roomState } = useGameStore();
   const { playerSecret } = usePlayerSecretData(roomId, user?.uid || null);
   const { secretState } = useSecretData(roomId, isST);
+  const [pendingMayorExecution, setPendingMayorExecution] = useState<{ targetUid: string } | null>(null);
 
   const events = roomState?.events || {};
   const lastEventId = Object.keys(events).sort().pop();
@@ -223,36 +225,14 @@ export function DayPhase({ isST }: { isST: boolean }) {
     await update(ref(database), updates);
   };
 
-  const finalizeDay = async () => {
+  const executeAndTransition = async (finalExecutionUid: string | null) => {
     if (!isST || !secretState || !roomState) return;
     const pubClone = JSON.parse(JSON.stringify(roomState));
     const secClone = JSON.parse(JSON.stringify(secretState));
     const targetUid = pubClone.executionTargetUid;
-    const targetSecret = targetUid ? secClone.players[targetUid] : null;
     const updates: Record<string, any> = {};
-    let finalExecutionUid: string | null = targetUid;
 
     if (targetUid) {
-       if (targetSecret?.character === 'mayor' && !targetSecret.isPoisoned && !targetSecret.isDrunk) {
-          const alivePlayers = Object.values(pubClone.players).filter((p: any) => !p.isDead && p.uid !== targetUid);
-          let promptText = `처형 대상이 시장(${roomState.players[targetUid].name})입니다.\n시장의 능력으로 다른 플레이어를 대신 처형하려면 아래 번호를 입력하세요.\n아무도 죽지 않게 하려면 0을, 시장 본인이 그대로 처형되게 하려면 아무것도 입력하지 않고 '확인'을 누르거나 '취소'를 누르세요.\n\n0: 아무도 처형하지 않음 (생존)\n`;
-          alivePlayers.forEach((p: any, idx: number) => {
-             promptText += `${idx + 1}: ${p.name}\n`;
-          });
-          const result = window.prompt(promptText);
-          
-          if (result !== null && result.trim() !== '') {
-             const choice = parseInt(result.trim());
-             if (choice === 0) {
-                finalExecutionUid = null;
-                alert(`아무도 처형되지 않고 밤이 됩니다.`);
-             } else if (choice > 0 && choice <= alivePlayers.length) {
-                finalExecutionUid = (alivePlayers[choice - 1] as any).uid;
-                alert(`시장 대신 ${(alivePlayers[choice - 1] as any).name} 님이 처형됩니다.`);
-             }
-          }
-       }
-
        if (finalExecutionUid) {
           const finalSecret = secClone.players[finalExecutionUid];
           pubClone.players[finalExecutionUid].isDead = true;
@@ -388,6 +368,20 @@ export function DayPhase({ isST }: { isST: boolean }) {
 
     updates[`secret/rooms/${roomId}`] = secClone;
     await update(ref(database), updates);
+    setPendingMayorExecution(null);
+  };
+
+  const finalizeDay = async () => {
+    if (!isST || !secretState || !roomState) return;
+    const targetUid = roomState.executionTargetUid || null;
+    const targetSecret = targetUid ? secretState.players[targetUid] : null;
+
+    if (targetUid && targetSecret?.character === 'mayor' && !targetSecret.isPoisoned && !targetSecret.isDrunk) {
+       setPendingMayorExecution({ targetUid });
+       return;
+    }
+    
+    executeAndTransition(targetUid);
   };
 
   const hasPendingSlayerShot = Object.values(events).some((e: any) => e.type === 'slayer_shot' && e.actorUid === user.uid && e.status === 'pending');
@@ -587,6 +581,55 @@ export function DayPhase({ isST }: { isST: boolean }) {
         <PlayerRecords 
           messageHistory={playerSecret?.messageHistory}
         />
+      )}
+
+      {isST && pendingMayorExecution && (
+         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+            <div className="bg-slate-900 border border-slate-700 p-6 sm:p-8 rounded-3xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+               <h3 className="text-xl font-black text-amber-500 uppercase tracking-widest mb-2">시장 처형 대체 선택</h3>
+               <p className="text-sm text-slate-300 mb-6 leading-relaxed">
+                  처형 대상이 시장(<span className="font-bold text-amber-400">{roomState.players[pendingMayorExecution.targetUid]?.name}</span>)입니다.<br/>
+                  시장의 능력으로 다른 플레이어를 대신 처형하거나 아무도 죽지 않게 할 수 있습니다. 
+                  대신 죽을 사람을 아래에서 선택해 주세요.
+               </p>
+               
+               <div className="flex flex-col gap-3">
+                  <Button 
+                     onClick={() => executeAndTransition(null)} 
+                     variant="secondary" 
+                     className="w-full text-emerald-400 border-emerald-500/30 bg-emerald-950/20 hover:bg-emerald-900/40 font-black h-14"
+                  >
+                     아무도 처형하지 않음 (생존)
+                  </Button>
+                  
+                  <div className="h-px w-full bg-slate-800 my-2"></div>
+                  
+                  <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mb-1">대체 처형 대상 (생존자 목록)</p>
+                  <div className="grid grid-cols-2 gap-2">
+                     {Object.values(roomState.players).filter((p: any) => !p.isDead && p.uid !== pendingMayorExecution.targetUid).map((p: any) => (
+                        <Button 
+                           key={p.uid}
+                           onClick={() => executeAndTransition(p.uid)}
+                           variant="danger"
+                           className="font-bold uppercase tracking-widest h-12"
+                        >
+                           {p.name} 처형
+                        </Button>
+                     ))}
+                  </div>
+
+                  <div className="h-px w-full bg-slate-800 my-2"></div>
+
+                  <Button 
+                     onClick={() => executeAndTransition(pendingMayorExecution.targetUid)} 
+                     variant="ghost" 
+                     className="w-full text-rose-500 border-rose-500/30 hover:bg-rose-950/40 font-black h-14 uppercase tracking-widest"
+                  >
+                     시장 본인 처형
+                  </Button>
+               </div>
+            </div>
+         </div>
       )}
     </div>
   );
