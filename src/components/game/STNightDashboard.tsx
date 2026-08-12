@@ -390,7 +390,11 @@ export function STNightDashboard() {
                     {actions[p.uid] && (
                        <div className="bg-emerald-950/20 border border-emerald-900/30 p-2.5 rounded-xl mb-2">
                           <p className="text-xs text-emerald-400 font-bold">
-                             👉 지목 대상: <span className="text-white">{[actions[p.uid].targetUid, actions[p.uid].target2Uid].filter(Boolean).map(uid => roomState.players[uid as string]?.name || '알 수 없음').join(', ') || '지목 안함 (확인 완료)'}</span>
+                             👉 지목 대상: <span className="text-white">{[actions[p.uid].targetUid, actions[p.uid].target2Uid].filter(Boolean).map(uid => {
+                                const targetName = roomState.players[uid as string]?.name || '알 수 없음';
+                                const targetRole = secretState.players[uid as string]?.character;
+                                return `${targetName}(${getRoleName(targetRole)})`;
+                             }).join(', ') || '지목 안함 (확인 완료)'}</span>
                           </p>
                        </div>
                     )}
