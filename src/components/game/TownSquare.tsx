@@ -470,11 +470,11 @@ export function TownSquare() {
         )}
       </AnimatePresence>
 
-      <div className="w-full overflow-auto pb-6 custom-scrollbar px-2 flex" style={{ minHeight: `${Math.max(300, center * 2)}px` }}>
-         <div className="flex m-auto" style={{ minWidth: '100%', minHeight: '100%', width: 'fit-content', height: 'fit-content' }}>
+      <div className="w-full overflow-x-auto overflow-y-visible pb-12 custom-scrollbar">
+         <div className="min-w-full w-max flex justify-center px-4 sm:px-10 py-10">
             <div 
                style={{ width: `${center * 2}px`, height: `${center * 2}px` }}
-               className="relative m-auto bg-slate-900/10 rounded-full border border-slate-800/30 flex items-center justify-center flex-shrink-0 transition-all duration-300"
+               className="relative bg-slate-900/10 rounded-full border border-slate-800/30 flex-shrink-0 transition-all duration-300"
             >
            {role === 'st' && !isVoting && (
              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none z-10 animate-fade-in">
@@ -508,8 +508,8 @@ export function TownSquare() {
                center={center}
              />
            ))}
-         </div>
-       </div>
+          </div>
+        </div>
       </div>
     </div>
   );
