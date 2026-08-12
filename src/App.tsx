@@ -258,7 +258,9 @@ function App() {
                      <button onClick={handleReturnToLobby} className={`w-full py-5 rounded-2xl font-black uppercase tracking-widest text-lg shadow-xl transition-all active:scale-95 ${roomState.winner === 'good' ? "bg-sky-500 text-slate-950 hover:bg-sky-400" : "bg-rose-600 text-white hover:bg-rose-500"}`}>대기실 이동</button>
                    </>
                 ) : (
-                   <button onClick={resetSession} className={`w-full py-5 rounded-2xl font-black uppercase tracking-widest text-lg shadow-xl transition-all active:scale-95 ${roomState.winner === 'good' ? "bg-sky-500 text-slate-950 hover:bg-sky-400" : "bg-rose-600 text-white hover:bg-rose-500"}`}>로비로 돌아가기</button>
+                   <div className="w-full py-5 rounded-2xl font-black uppercase tracking-widest text-sm bg-slate-900/50 text-slate-400 border border-slate-800 text-center animate-pulse">
+                     스토리텔러가 다음 게임을 준비 중입니다...
+                   </div>
                 )}
               </div>
            </div>
