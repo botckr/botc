@@ -1,6 +1,5 @@
 import { useState, useMemo, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { useGameStore } from '../../store/gameStore';
 import { useSecretData, usePlayerSecretData } from '../../hooks/useFirebaseSync';
 import { cn } from '../../lib/utils/cn';
@@ -22,10 +21,10 @@ const PlayerToken = memo(({
   isVoting,
   role,
   isNominated,
-  hasVotedYes
+  hasVotedYes,
+  radius,
+  center
 }: any) => {
-  const radius = total > 10 ? 180 : 145;
-  const center = total > 10 ? 220 : 180;
   const angle = (index / total) * 2 * Math.PI - Math.PI / 2;
   const left = center + radius * Math.cos(angle);
   const top = center + radius * Math.sin(angle);
@@ -153,6 +152,7 @@ export function TownSquare() {
   const [selectedNominator, setSelectedNominator] = useState<string | null>(null);
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'townsfolk' | 'outsider' | 'evil'>('townsfolk');
+  const [zoomLevel, setZoomLevel] = useState<number>(1);
 
   if (!roomState) return null;
 
@@ -161,6 +161,11 @@ export function TownSquare() {
     Object.values(roomState.players).sort((a, b) => a.seatIndex - b.seatIndex),
     [roomState.players]
   );
+
+  const baseRadius = players.length > 10 ? 180 : 145;
+  const baseCenter = players.length > 10 ? 220 : 180;
+  const radius = baseRadius * zoomLevel;
+  const center = baseCenter * zoomLevel;
 
   const isVoting = roomState.status === 'voting';
   const usedNominators = roomState.usedNominators || [];
@@ -354,17 +359,22 @@ export function TownSquare() {
 
   return (
     <div className="w-full flex flex-col items-center select-none py-2 sm:py-6 relative">
-      <div className="mb-8 flex items-center justify-between w-full max-w-sm px-4">
-        <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.4em] font-serif">Town Square</h3>
-        <div className="flex gap-3 items-center">
+      <div className="mb-6 flex flex-wrap gap-4 items-center justify-between w-full px-4">
+        <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.4em] font-serif shrink-0">Town Square</h3>
+        <div className="flex gap-2 sm:gap-3 items-center ml-auto">
+           <div className="flex bg-slate-900 rounded-full border border-slate-700 p-0.5 shadow-inner">
+             <button onClick={() => setZoomLevel(p => Math.max(0.6, p - 0.2))} className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" aria-label="축소">-</button>
+             <button onClick={() => setZoomLevel(1)} className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-colors text-xs font-bold font-mono">1X</button>
+             <button onClick={() => setZoomLevel(p => Math.min(2.0, p + 0.2))} className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" aria-label="확대">+</button>
+           </div>
            <button 
              onClick={() => setIsHelpOpen(true)}
-             className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center font-black shadow-sm hover:bg-slate-700 hover:text-white transition-colors"
+             className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center font-black shadow-sm hover:bg-slate-700 hover:text-white transition-colors shrink-0"
              aria-label="캐릭터 도움말"
            >
              ?
            </button>
-           <span className="text-xs text-sky-500 font-mono bg-sky-500/10 px-3 py-1 rounded border border-sky-500/20 uppercase font-black tracking-widest">
+           <span className="text-xs text-sky-500 font-mono bg-sky-500/10 px-3 py-1 rounded border border-sky-500/20 uppercase font-black tracking-widest shrink-0">
              DAY {roomState.dayNumber}
            </span>
         </div>
@@ -457,53 +467,44 @@ export function TownSquare() {
         )}
       </AnimatePresence>
 
-      <div className="w-full pb-6 flex justify-center overflow-hidden touch-none">
-        <TransformWrapper
-          initialScale={1}
-          minScale={0.5}
-          maxScale={2}
-          centerOnInit={true}
-          wheel={{ step: 0.1 }}
-          pinch={{ step: 5 }}
-        >
-          <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
-             <div className={cn(
-                "relative bg-slate-900/10 rounded-full border border-slate-800/30 flex items-center justify-center flex-shrink-0 transition-all",
-                players.length > 10 ? "w-[440px] h-[440px]" : "w-[360px] h-[360px]"
-             )}>
-               {role === 'st' && !isVoting && (
-                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none z-10 animate-fade-in">
-                    <p className="text-xs font-black uppercase tracking-widest text-slate-600 mb-1">
-                      {selectedNominator ? "지목할 대상을 클릭하세요" : "지목자를 클릭하세요"}
-                    </p>
-                    <div className="flex justify-center gap-1">
-                       <div className={cn("w-1.5 h-1.5 rounded-full transition-colors", selectedNominator ? "bg-sky-500" : "bg-sky-500 animate-pulse")}></div>
-                       <div className={cn("w-1.5 h-1.5 rounded-full transition-colors", selectedNominator ? "bg-rose-500 animate-pulse" : "bg-slate-800")}></div>
-                    </div>
-                 </div>
-               )}
-
-               <div className="w-24 h-28 bg-slate-950 rounded-[40%] blur-3xl opacity-50 absolute pointer-events-none"></div>
-               
-               {players.map((p, i) => (
-                 <PlayerToken
-                   key={p.uid}
-                   player={p}
-                   index={i}
-                   total={players.length}
-                   secret={secretState?.players[p.uid]}
-                   showFullInfo={showFullInfo}
-                   selectedNominator={selectedNominator}
-                   onClick={handlePlayerClick}
-                   isVoting={isVoting}
-                   role={role}
-                   isNominated={currentTargetUid === p.uid}
-                   hasVotedYes={currentVoterUids.includes(p.uid)}
-                 />
-               ))}
+      <div className="w-full overflow-auto pb-6 custom-scrollbar px-2 -mx-2 flex justify-center items-center" style={{ minHeight: `${center * 2}px` }}>
+         <div 
+            style={{ width: `${center * 2}px`, height: `${center * 2}px` }}
+            className="relative bg-slate-900/10 rounded-full border border-slate-800/30 flex items-center justify-center flex-shrink-0 transition-all duration-300"
+         >
+           {role === 'st' && !isVoting && (
+             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none z-10 animate-fade-in">
+                <p className="text-xs font-black uppercase tracking-widest text-slate-600 mb-1">
+                  {selectedNominator ? "지목할 대상을 클릭하세요" : "지목자를 클릭하세요"}
+                </p>
+                <div className="flex justify-center gap-1">
+                   <div className={cn("w-1.5 h-1.5 rounded-full transition-colors", selectedNominator ? "bg-sky-500" : "bg-sky-500 animate-pulse")}></div>
+                   <div className={cn("w-1.5 h-1.5 rounded-full transition-colors", selectedNominator ? "bg-rose-500 animate-pulse" : "bg-slate-800")}></div>
+                </div>
              </div>
-          </TransformComponent>
-        </TransformWrapper>
+           )}
+
+           <div className="w-24 h-28 bg-slate-950 rounded-[40%] blur-3xl opacity-50 absolute pointer-events-none transition-all duration-300" style={{ transform: `scale(${zoomLevel})` }}></div>
+           
+           {players.map((p, i) => (
+             <PlayerToken
+               key={p.uid}
+               player={p}
+               index={i}
+               total={players.length}
+               secret={secretState?.players[p.uid]}
+               showFullInfo={showFullInfo}
+               selectedNominator={selectedNominator}
+               onClick={handlePlayerClick}
+               isVoting={isVoting}
+               role={role}
+               isNominated={currentTargetUid === p.uid}
+               hasVotedYes={currentVoterUids.includes(p.uid)}
+               radius={radius}
+               center={center}
+             />
+           ))}
+         </div>
       </div>
     </div>
   );
