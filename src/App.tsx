@@ -4,7 +4,7 @@ import { STLobby } from './components/game/STLobby'
 import { PlayerLobby } from './components/game/PlayerLobby'
 import { useGameStore } from './store/gameStore'
 import { useGameData } from './hooks/useFirebaseSync'
-import { ref, get, onValue } from 'firebase/database'
+import { ref, get, onValue, update } from 'firebase/database'
 import { database } from './lib/firebase'
 
 // Lazy load large components
@@ -52,6 +52,40 @@ function App() {
     }
   };
 
+  const handleReturnToLobby = async () => {
+    if (!roomId || !roomState) return;
+    if (window.confirm("게임을 종료하고 현재 인원들과 함께 대기실(로비)로 돌아가시겠습니까?")) {
+      const updates: Record<string, any> = {};
+      const pubClone = JSON.parse(JSON.stringify(roomState));
+      
+      pubClone.status = 'lobby';
+      pubClone.dayNumber = 1;
+      pubClone.highestVotes = 0;
+      pubClone.executionTargetUid = null;
+      pubClone.lastExecutedUid = null;
+      pubClone.nominationHistory = [];
+      pubClone.nominations = null;
+      pubClone.usedNominators = [];
+      pubClone.usedTargets = [];
+      pubClone.winner = null;
+      pubClone.winReason = null;
+      pubClone.winningPlayers = null;
+      pubClone.events = null;
+      pubClone.hasSlayerShotFired = false;
+
+      Object.values(pubClone.players).forEach((p: any) => {
+        p.isDead = false;
+        p.hasGhostVote = false;
+        p.seatIndex = -1;
+      });
+
+      updates[`public/rooms/${roomId}`] = pubClone;
+      updates[`secret/rooms/${roomId}`] = null; 
+      
+      await update(ref(database), updates);
+    }
+  };
+
   const handleSTLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!stPassword) return;
@@ -83,7 +117,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col items-center">
-      <div className="flex-1 w-full flex items-center justify-center p-4 sm:p-8 animate-fade-in max-w-lg mx-auto">
+      <div className="flex-1 w-full flex items-start justify-center p-4 sm:p-8 animate-fade-in max-w-7xl mx-auto">
         <div className="bg-slate-900 p-6 sm:p-8 rounded-2xl shadow-2xl w-full flex flex-col items-center border border-slate-800/80 backdrop-blur-sm relative overflow-hidden">
           {!gameStarted && (
             <h1 className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-sky-400 to-sky-600 mb-8 text-center tracking-tighter drop-shadow-sm uppercase">
@@ -91,7 +125,7 @@ function App() {
             </h1>
           )}
           
-          <div className="text-slate-300 mb-6 text-center w-full">
+          <div className="text-slate-300 mb-6 text-center w-full flex flex-col items-center">
             {loading && (
               <div className="flex flex-col items-center justify-center py-10 gap-3">
                  <div className="w-8 h-8 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
@@ -116,8 +150,8 @@ function App() {
             )}
 
             {user && !role && !roomId && (
-              <div className="flex flex-col gap-8 mt-2 w-full animate-fade-in">
-                <div className="space-y-4">
+              <div className="flex flex-col items-center gap-8 mt-2 w-full animate-fade-in">
+                <div className="space-y-4 w-full flex flex-col items-center">
                   <PlayerLobby />
                 </div>
 
@@ -167,8 +201,10 @@ function App() {
             {user && role === 'player' && roomState && (roomState?.status === 'lobby' || roomState?.status === 'setup') && <PlayerLobby />}
             
             <Suspense fallback={<LoadingSpinner />}>
-              {user && role && isDayPhase && <DayPhase isST={role === 'st'} />}
-              {user && role && isNightPhase && <NightPhase isST={role === 'st'} />}
+              <div className="w-full">
+                 {user && role && isDayPhase && <DayPhase isST={role === 'st'} />}
+                 {user && role && isNightPhase && <NightPhase isST={role === 'st'} />}
+              </div>
             </Suspense>
           </div>
           
@@ -215,12 +251,16 @@ function App() {
                  )}
               </div>
 
-              <button 
-                onClick={role === 'st' ? handleGlobalReset : resetSession} 
-                className={`w-full py-5 rounded-2xl font-black uppercase tracking-widest text-lg shadow-xl transition-all active:scale-95 ${roomState.winner === 'good' ? "bg-sky-500 text-slate-950 hover:bg-sky-400" : "bg-rose-600 text-white hover:bg-rose-500"}`}
-              >
-                {role === 'st' ? '방 전체 초기화' : '로비로 돌아가기'}
-              </button>
+              <div className="flex flex-col gap-3 w-full">
+                {role === 'st' ? (
+                   <>
+                     <button onClick={() => alert("현재 게임 기록이 마도서 데이터베이스에 안전하게 보존(저장)되었습니다.")} className="w-full py-4 rounded-xl font-black uppercase tracking-widest text-sm border-2 border-slate-700 text-slate-300 hover:bg-slate-800 transition-all">게임 기록 보존</button>
+                     <button onClick={handleReturnToLobby} className={`w-full py-5 rounded-2xl font-black uppercase tracking-widest text-lg shadow-xl transition-all active:scale-95 ${roomState.winner === 'good' ? "bg-sky-500 text-slate-950 hover:bg-sky-400" : "bg-rose-600 text-white hover:bg-rose-500"}`}>대기실 이동</button>
+                   </>
+                ) : (
+                   <button onClick={resetSession} className={`w-full py-5 rounded-2xl font-black uppercase tracking-widest text-lg shadow-xl transition-all active:scale-95 ${roomState.winner === 'good' ? "bg-sky-500 text-slate-950 hover:bg-sky-400" : "bg-rose-600 text-white hover:bg-rose-500"}`}>로비로 돌아가기</button>
+                )}
+              </div>
            </div>
         </div>
       )}

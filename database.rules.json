@@ -14,7 +14,26 @@
       "rooms": {
         "$roomId": {
           ".read": "auth != null",
-          ".write": "auth != null"
+          ".write": "auth != null && (!data.exists() || data.child('stUid').val() === auth.uid)",
+          "players": {
+            "$uid": {
+              ".write": "auth != null && $uid === auth.uid"
+            }
+          },
+          "nominations": {
+            "$nomId": {
+              "voters": {
+                "$uid": {
+                  ".write": "auth != null && $uid === auth.uid"
+                }
+              }
+            }
+          },
+          "events": {
+            "$eventId": {
+              ".write": "auth != null"
+            }
+          }
         }
       }
     },
@@ -27,7 +46,7 @@
           "players": {
             "$uid": {
               ".read": "auth != null && $uid === auth.uid",
-              ".write": "auth != null && data.parent().parent().child('stUid').val() === auth.uid"
+              ".write": "auth != null && root.child('secret/rooms/' + $roomId + '/stUid').val() === auth.uid"
             }
           },
           "nightActions": {

@@ -1,4 +1,5 @@
 import { useState, useMemo, memo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../../store/gameStore';
 import { useSecretData, usePlayerSecretData } from '../../hooks/useFirebaseSync';
 import { cn } from '../../lib/utils/cn';
@@ -22,14 +23,11 @@ const PlayerToken = memo(({
   isNominated,
   hasVotedYes
 }: any) => {
-  const radius = 145;
-  const pos = useMemo(() => {
-    const angle = (index / total) * 2 * Math.PI - Math.PI / 2;
-    return {
-      left: `${180 + radius * Math.cos(angle)}px`,
-      top: `${180 + radius * Math.sin(angle)}px`,
-    };
-  }, [index, total]);
+  const radius = total > 10 ? 180 : 145;
+  const center = total > 10 ? 220 : 180;
+  const angle = (index / total) * 2 * Math.PI - Math.PI / 2;
+  const left = center + radius * Math.cos(angle);
+  const top = center + radius * Math.sin(angle);
 
   const isDead = player.isDead;
   const hasGhostVote = player.hasGhostVote;
@@ -41,8 +39,12 @@ const PlayerToken = memo(({
   const isBeingTargeted = selectedNominator && !isSelectingNominator;
 
   return (
-    <div 
-      style={pos} 
+    <motion.button
+      initial={{ opacity: 0, scale: 0, left: `${center}px`, top: `${center}px` }}
+      animate={{ opacity: 1, scale: 1, left: `${left}px`, top: `${top}px` }}
+      transition={{ type: "spring", stiffness: 200, damping: 20, delay: index * 0.03 }}
+      whileHover={{ scale: 1.1, zIndex: 50 }}
+      whileTap={{ scale: 0.95 }}
       onClick={() => onClick(player.uid)}
       className={cn(
         "absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center group transition-all duration-300",
@@ -121,7 +123,7 @@ const PlayerToken = memo(({
            </div>
         )}
       </div>
-    </div>
+    </motion.button>
   );
 });
 
@@ -149,6 +151,7 @@ export function TownSquare() {
   // ST Selection State
   const [selectedNominator, setSelectedNominator] = useState<string | null>(null);
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<'townsfolk' | 'outsider' | 'evil'>('townsfolk');
 
   if (!roomState) return null;
 
@@ -367,74 +370,128 @@ export function TownSquare() {
       </div>
 
       {/* Help Modal */}
-      {isHelpOpen && (
-        <div className="fixed inset-0 z-[200] bg-slate-950/95 backdrop-blur-md overflow-y-auto flex flex-col items-center p-4 sm:p-8 animate-fade-in">
-          <div className="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-2xl relative mb-10 select-text">
-             <button 
-               onClick={() => setIsHelpOpen(false)}
-               className="absolute top-6 right-6 w-8 h-8 bg-slate-800 text-slate-400 rounded-full flex items-center justify-center font-black hover:bg-rose-600 hover:text-white transition-colors"
-             >
-               X
-             </button>
-             <h2 className="text-2xl font-black text-slate-200 uppercase tracking-tighter mb-8 border-b border-slate-800 pb-4">캐릭터 가이드</h2>
-             
-             <div className="space-y-8">
-               {['townsfolk', 'outsider', 'minion', 'demon'].map(type => {
-                 const typeLabel = ({ townsfolk: '주민 (Townsfolk)', outsider: '외부자 (Outsider)', minion: '하수인 (Minion)', demon: '악마 (Demon)' } as Record<string, string>)[type];
-                 const typeColor = ({ townsfolk: 'text-sky-400', outsider: 'text-sky-200', minion: 'text-rose-400', demon: 'text-rose-600' } as Record<string, string>)[type] || 'text-slate-400';
-                 const borderColor = typeColor.includes('sky') ? 'border-sky-500' : (typeColor.includes('rose') ? 'border-rose-500' : 'border-slate-500');
-                 const roles = TROUBLE_BREWING_ROLES.filter(r => r.type === type);
-                 
-                 return (
-                   <div key={type} className="space-y-3">
-                     <h3 className={cn("text-xs font-black uppercase tracking-widest border-l-2 pl-3", typeColor, borderColor)}>{typeLabel}</h3>
-                     <div className="space-y-2">
-                       {roles.map(r => (
-                         <div key={r.id} className="bg-slate-950/50 p-3 rounded-xl border border-slate-800">
-                           <span className={cn("text-sm font-bold block mb-1", typeColor)}>{r.name}</span>
-                           <p className="text-xs text-slate-400 leading-relaxed break-keep-all">{r.description}</p>
-                         </div>
-                       ))}
-                     </div>
-                   </div>
-                 )
-               })}
-             </div>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {isHelpOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] bg-slate-950/95 backdrop-blur-md overflow-hidden flex flex-col items-center"
+          >
+            <motion.div 
+              initial={{ y: 50, scale: 0.95 }}
+              animate={{ y: 0, scale: 1 }}
+              exit={{ y: 20, scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              className="w-full h-full sm:max-w-xl sm:h-auto sm:max-h-[85vh] sm:mt-10 sm:rounded-3xl bg-slate-900 flex flex-col shadow-2xl relative"
+            >
+               <div className="sticky top-0 z-10 bg-slate-900/90 backdrop-blur border-b border-slate-700/50 p-4 sm:p-6 flex flex-col gap-4 sm:rounded-t-3xl">
+                  <div className="flex justify-between items-center">
+                     <h2 className="text-xl sm:text-2xl font-black text-slate-200 uppercase tracking-tighter">캐릭터 가이드</h2>
+                     <button 
+                       onClick={() => setIsHelpOpen(false)}
+                       className="w-10 h-10 bg-slate-800 text-slate-400 rounded-full flex items-center justify-center font-black hover:bg-rose-600 hover:text-white transition-colors"
+                     >
+                       X
+                     </button>
+                  </div>
+                  <div className="flex gap-2 w-full">
+                     {(['townsfolk', 'outsider', 'evil'] as const).map(tab => (
+                        <button
+                           key={tab}
+                           onClick={() => setActiveTab(tab)}
+                           className={cn(
+                              "flex-1 py-2 text-xs sm:text-sm font-black uppercase tracking-widest rounded-lg transition-all",
+                              activeTab === tab ? "bg-sky-600 text-white shadow-lg scale-105" : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                           )}
+                        >
+                           {tab === 'townsfolk' ? '주민' : tab === 'outsider' ? '외부자' : '하수인/악마'}
+                        </button>
+                     ))}
+                  </div>
+               </div>
+               
+               <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-20 custom-scrollbar">
+                  <AnimatePresence mode="wait">
+                    <motion.div 
+                      key={activeTab}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 10 }}
+                      transition={{ duration: 0.2 }}
+                      className="space-y-6"
+                    >
+                      {(() => {
+                        const renderType = (type: 'townsfolk' | 'outsider' | 'minion' | 'demon', label: string, colorClass: string) => {
+                           const roles = TROUBLE_BREWING_ROLES.filter(r => r.type === type);
+                           return (
+                              <div key={type} className="space-y-3 mb-6">
+                                <h3 className={cn("text-sm font-black uppercase tracking-widest border-l-4 pl-3", colorClass, colorClass.includes('sky') ? 'border-sky-500' : 'border-rose-500')}>{label}</h3>
+                                <div className="space-y-2">
+                                  {roles.map(r => (
+                                    <div key={r.id} className="bg-slate-950/50 p-3 sm:p-4 rounded-xl border border-slate-800/80">
+                                      <span className={cn("text-base font-bold block mb-1.5", colorClass)}>{r.name}</span>
+                                      <p className="text-sm text-slate-400 leading-relaxed break-keep-all">{r.description}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                           );
+                        };
 
-      <div className="relative w-[360px] h-[360px] bg-slate-900/10 rounded-full border border-slate-800/30 flex items-center justify-center">
-        {role === 'st' && !isVoting && (
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none z-10 animate-fade-in">
-             <p className="text-xs font-black uppercase tracking-widest text-slate-600 mb-1">
-               {selectedNominator ? "지목할 대상을 클릭하세요" : "지목자를 클릭하세요"}
-             </p>
-             <div className="flex justify-center gap-1">
-                <div className={cn("w-1.5 h-1.5 rounded-full transition-colors", selectedNominator ? "bg-sky-500" : "bg-sky-500 animate-pulse")}></div>
-                <div className={cn("w-1.5 h-1.5 rounded-full transition-colors", selectedNominator ? "bg-rose-500 animate-pulse" : "bg-slate-800")}></div>
-             </div>
-          </div>
+                        if (activeTab === 'townsfolk') return renderType('townsfolk', '마을 주민 (Townsfolk)', 'text-sky-400');
+                        if (activeTab === 'outsider') return renderType('outsider', '외부자 (Outsider)', 'text-sky-200');
+                        if (activeTab === 'evil') return (
+                           <>
+                              {renderType('minion', '하수인 (Minion)', 'text-rose-400')}
+                              {renderType('demon', '악마 (Demon)', 'text-rose-600')}
+                           </>
+                        );
+                      })()}
+                    </motion.div>
+                  </AnimatePresence>
+               </div>
+            </motion.div>
+          </motion.div>
         )}
+      </AnimatePresence>
 
-        <div className="w-24 h-28 bg-slate-950 rounded-[40%] blur-3xl opacity-50 absolute pointer-events-none"></div>
-        
-        {players.map((p, i) => (
-          <PlayerToken
-            key={p.uid}
-            player={p}
-            index={i}
-            total={players.length}
-            secret={secretState?.players[p.uid]}
-            showFullInfo={showFullInfo}
-            selectedNominator={selectedNominator}
-            onClick={handlePlayerClick}
-            isVoting={isVoting}
-            role={role}
-            isNominated={currentTargetUid === p.uid}
-            hasVotedYes={currentVoterUids.includes(p.uid)}
-          />
-        ))}
+      <div className="w-full overflow-x-auto pb-6 custom-scrollbar px-2 -mx-2 flex justify-center">
+         <div className={cn(
+            "relative bg-slate-900/10 rounded-full border border-slate-800/30 flex items-center justify-center flex-shrink-0 transition-all",
+            players.length > 10 ? "w-[440px] h-[440px]" : "w-[360px] h-[360px]"
+         )}>
+           {role === 'st' && !isVoting && (
+             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none z-10 animate-fade-in">
+                <p className="text-xs font-black uppercase tracking-widest text-slate-600 mb-1">
+                  {selectedNominator ? "지목할 대상을 클릭하세요" : "지목자를 클릭하세요"}
+                </p>
+                <div className="flex justify-center gap-1">
+                   <div className={cn("w-1.5 h-1.5 rounded-full transition-colors", selectedNominator ? "bg-sky-500" : "bg-sky-500 animate-pulse")}></div>
+                   <div className={cn("w-1.5 h-1.5 rounded-full transition-colors", selectedNominator ? "bg-rose-500 animate-pulse" : "bg-slate-800")}></div>
+                </div>
+             </div>
+           )}
+
+           <div className="w-24 h-28 bg-slate-950 rounded-[40%] blur-3xl opacity-50 absolute pointer-events-none"></div>
+           
+           {players.map((p, i) => (
+             <PlayerToken
+               key={p.uid}
+               player={p}
+               index={i}
+               total={players.length}
+               secret={secretState?.players[p.uid]}
+               showFullInfo={showFullInfo}
+               selectedNominator={selectedNominator}
+               onClick={handlePlayerClick}
+               isVoting={isVoting}
+               role={role}
+               isNominated={currentTargetUid === p.uid}
+               hasVotedYes={currentVoterUids.includes(p.uid)}
+             />
+           ))}
+         </div>
       </div>
     </div>
   );

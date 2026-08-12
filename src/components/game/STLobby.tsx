@@ -36,6 +36,7 @@ export function STLobby() {
     try {
       // Setup public state
       await set(ref(database, `public/rooms/${newRoomId}`), {
+        stUid: user.uid,
         status: 'lobby',
         dayNumber: 0,
         players: {},

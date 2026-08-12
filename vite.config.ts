@@ -6,4 +6,18 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   base: '/botc/',
   plugins: [react(), tailwindcss()],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id: string) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react')) return 'vendor';
+            if (id.includes('firebase')) return 'firebase';
+            if (id.includes('framer-motion') || id.includes('tailwind') || id.includes('clsx')) return 'ui';
+            return 'deps';
+          }
+        }
+      }
+    }
+  }
 })

@@ -1,5 +1,6 @@
-import { memo, useState, useEffect } from 'react';
-import { getRoleName, getRoleDescription } from '../../../constants/roles';
+import { memo, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { getRoleName } from '../../../constants/roles';
 import type { RoleType, Alignment } from '../../../types/character';
 
 interface PlayerIdentityProps {
@@ -20,20 +21,20 @@ export const PlayerIdentity = memo(({
   fakeCharacter, 
   alignment, 
   evilTeamInfo,
-  defaultOpen = false,
   playerName
 }: PlayerIdentityProps) => {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    setIsOpen(defaultOpen);
-  }, [defaultOpen]);
-
+  if (!character) return null;
   const currentRoleName = getRoleName(fakeCharacter || character);
-  const currentRoleDesc = getRoleDescription(fakeCharacter || character);
 
   return (
-    <div className="bg-slate-900/80 rounded-[2.5rem] border border-slate-800 backdrop-blur shadow-2xl overflow-hidden w-full transition-all duration-300">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+      className="bg-slate-900/80 rounded-[2.5rem] border border-slate-800 backdrop-blur shadow-2xl overflow-hidden w-full transition-all duration-300"
+    >
       <button 
         onClick={() => setIsOpen(!isOpen)} 
         aria-expanded={isOpen}
@@ -53,44 +54,53 @@ export const PlayerIdentity = memo(({
         </span>
       </button>
 
-      {isOpen && (
-        <div className="p-6 sm:p-8 pt-0 space-y-6 sm:space-y-8 animate-fade-in border-t border-slate-800/50 mt-2 bg-slate-950/40">
-           <div className="py-6 px-6 sm:px-8 bg-slate-950/80 rounded-[1.5rem] border border-slate-800 shadow-inner mt-4 sm:mt-6 text-center space-y-3">
-              <p className="text-xs font-black text-slate-600 uppercase tracking-widest mb-2">현재 나의 정체</p>
-              <p className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-sky-100 to-sky-400 uppercase tracking-tighter italic">{currentRoleName}</p>
-              <p className="text-sm sm:text-xs text-slate-400 font-medium leading-relaxed break-keep-all">{currentRoleDesc}</p>
-           </div>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            <div className="p-6 sm:p-8 pt-0 space-y-6 sm:space-y-8 border-t border-slate-800/50 mt-2 bg-slate-950/40">
+               <div className="py-6 px-6 sm:px-8 bg-slate-950/80 rounded-[1.5rem] border border-slate-800 shadow-inner mt-4 sm:mt-6 text-center space-y-3">
+                  <p className="text-xs font-black text-slate-600 uppercase tracking-widest mb-2">현재 나의 정체</p>
+                  <p className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-sky-100 to-sky-400 uppercase tracking-tighter italic">{currentRoleName}</p>
+               </div>
 
-           {alignment === 'evil' && evilTeamInfo && (
-              <div className="p-5 sm:p-6 bg-rose-950/20 border border-rose-500/20 rounded-[1.5rem] space-y-5 sm:space-y-6 shadow-xl text-center">
-                 <p className="text-xs sm:text-sm font-black text-rose-500 uppercase tracking-widest border-b border-rose-500/10 pb-2 sm:pb-3">비밀 작전 브리핑</p>
-                 <div className="grid grid-cols-1 gap-5 sm:gap-6">
-                    <div>
-                      <span className="block text-xs sm:text-xs text-slate-500 font-black uppercase mb-1">악마(Demon)</span>
-                      <span className="text-lg sm:text-xl text-rose-400 font-black uppercase tracking-tight italic underline decoration-rose-500/20">{evilTeamInfo.demonName}</span>
-                    </div>
-                    <div>
-                      <span className="block text-xs sm:text-xs text-slate-500 font-black uppercase mb-1">하수인(Minions)</span>
-                      <span className="text-sm sm:text-base text-white font-bold leading-tight uppercase tracking-tight">{evilTeamInfo.minionNames.join(', ')}</span>
-                    </div>
-                    {evilTeamInfo.bluffs.length > 0 && character === 'imp' && playerName === evilTeamInfo.demonName && (
-                       <div className="pt-3 sm:pt-4 border-t border-rose-500/10">
-                          <span className="block text-xs sm:text-xs text-slate-500 font-black uppercase mb-2 sm:mb-3 tracking-widest">악마 블러프</span>
-                          <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center">
-                            {evilTeamInfo.bluffs.map(b => (
-                              <span key={b} className="bg-sky-500/10 text-sky-400 px-3 sm:px-4 py-1 sm:py-1.5 rounded-xl border border-sky-500/20 text-xs sm:text-xs font-black uppercase shadow-sm">
-                                {getRoleName(b)}
-                              </span>
-                            ))}
-                          </div>
-                       </div>
-                    )}
-                 </div>
-              </div>
-           )}
-        </div>
-      )}
-    </div>
+               {alignment === 'evil' && evilTeamInfo && (
+                  <div className="p-5 sm:p-6 bg-rose-950/20 border border-rose-500/20 rounded-[1.5rem] space-y-5 sm:space-y-6 shadow-xl text-center">
+                     <p className="text-xs sm:text-sm font-black text-rose-500 uppercase tracking-widest border-b border-rose-500/10 pb-2 sm:pb-3">비밀 작전 브리핑</p>
+                     <div className="grid grid-cols-1 gap-5 sm:gap-6">
+                        <div>
+                          <span className="block text-xs sm:text-xs text-slate-500 font-black uppercase mb-1">악마(Demon)</span>
+                          <span className="text-lg sm:text-xl text-rose-400 font-black uppercase tracking-tight italic underline decoration-rose-500/20">{evilTeamInfo.demonName}</span>
+                        </div>
+                        <div>
+                          <span className="block text-xs sm:text-xs text-slate-500 font-black uppercase mb-1">하수인(Minions)</span>
+                          <span className="text-sm sm:text-base text-white font-bold leading-tight uppercase tracking-tight">{evilTeamInfo.minionNames.join(', ')}</span>
+                        </div>
+                        {evilTeamInfo.bluffs.length > 0 && character === 'imp' && playerName === evilTeamInfo.demonName && (
+                           <div className="pt-3 sm:pt-4 border-t border-rose-500/10">
+                              <span className="block text-xs sm:text-xs text-slate-500 font-black uppercase mb-2 sm:mb-3 tracking-widest">악마 블러프</span>
+                              <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center">
+                                {evilTeamInfo.bluffs.map(b => (
+                                  <span key={b} className="bg-sky-500/10 text-sky-400 px-3 sm:px-4 py-1 sm:py-1.5 rounded-xl border border-sky-500/20 text-xs sm:text-xs font-black uppercase shadow-sm">
+                                    {getRoleName(b)}
+                                  </span>
+                                ))}
+                              </div>
+                           </div>
+                        )}
+                     </div>
+                  </div>
+               )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 });
 

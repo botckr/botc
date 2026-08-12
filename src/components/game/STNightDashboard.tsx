@@ -393,6 +393,22 @@ export function STNightDashboard() {
                       onChange={(e) => handleUpdateSuggestion(p.uid, e.target.value)}
                       className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs text-slate-300 focus:border-sky-500/50 focus:bg-slate-900 outline-none min-h-[80px] custom-scrollbar transition-all shadow-inner"
                     />
+                    {secret?.messageHistory && secret.messageHistory.length > 0 && (
+                       <details className="mt-3 group/details">
+                          <summary className="text-xs font-bold text-slate-500 cursor-pointer uppercase tracking-widest hover:text-sky-400 transition-colors list-none flex items-center justify-between bg-slate-900/50 p-2.5 rounded-xl border border-slate-800">
+                             과거 전송 기록 열람
+                             <span className="text-[10px] bg-slate-800 px-2 py-0.5 rounded-full text-slate-400">{secret.messageHistory.length}</span>
+                          </summary>
+                          <div className="mt-3 space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-1 pl-1">
+                             {secret.messageHistory.map((msg: string, idx: number) => (
+                                <div key={idx} className="bg-slate-950/80 p-3 rounded-xl border border-slate-800/80">
+                                   <span className="text-[10px] text-sky-500 font-black mb-1 block uppercase tracking-widest">{idx + 1}일차</span>
+                                   <p className="text-xs text-slate-400 whitespace-pre-wrap leading-relaxed">{msg}</p>
+                                </div>
+                             ))}
+                          </div>
+                       </details>
+                    )}
                  </div>
                );
             })}
