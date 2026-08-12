@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { database } from '../../lib/firebase';
-import { ref, get, query, orderByChild, limitToLast, endBefore } from 'firebase/database';
+import { ref, get, query, orderByChild, limitToLast, endBefore, remove } from 'firebase/database';
 import { Button } from '../ui/Button';
 import { getRoleName } from '../../constants/roles';
 import type { GameHistory } from '../../types/game';
@@ -65,6 +65,21 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
       console.error("Failed to load more histories:", e);
     } finally {
       setLoadingMore(false);
+    }
+  };
+
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (!window.confirm("이 기록을 정말 삭제하시겠습니까? (복구할 수 없습니다)")) return;
+    try {
+      await remove(ref(database, `history/${id}`));
+      setHistories(prev => prev.filter(h => h.id !== id));
+      if (selectedHistory?.id === id) {
+        setSelectedHistory(null);
+      }
+    } catch (err) {
+      console.error("Failed to delete history:", err);
+      alert("기록 삭제에 실패했습니다.");
     }
   };
 
@@ -434,8 +449,17 @@ export function HistoryViewer({ onClose }: { onClose: () => void }) {
                     <span className="text-xs text-slate-500">{new Date(h.timestamp).toLocaleString()}</span>
                     <span className="text-sm font-black text-slate-300">총 {h.players.length}인 게임</span>
                  </div>
-                 <div className={cn("px-3 py-1 rounded-full text-xs font-black uppercase", h.winner === 'good' ? 'bg-sky-500/20 text-sky-400' : 'bg-rose-500/20 text-rose-500')}>
-                    {h.winner === 'good' ? '선의 승리' : '악의 승리'}
+                 <div className="flex items-center gap-3">
+                    <div className={cn("px-3 py-1 rounded-full text-xs font-black uppercase", h.winner === 'good' ? 'bg-sky-500/20 text-sky-400' : 'bg-rose-500/20 text-rose-500')}>
+                       {h.winner === 'good' ? '선의 승리' : '악의 승리'}
+                    </div>
+                    <button 
+                       onClick={(e) => handleDelete(e, h.id)}
+                       className="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 text-slate-500 hover:text-rose-500 hover:bg-rose-500/10 hover:border-rose-500/30 flex items-center justify-center transition-all opacity-50 hover:opacity-100"
+                       title="기록 삭제"
+                    >
+                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                    </button>
                  </div>
                </div>
             ))}
