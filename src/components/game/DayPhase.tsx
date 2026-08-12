@@ -57,7 +57,7 @@ export function DayPhase({ isST }: { isST: boolean }) {
   const hasPendingSlayerShot = Object.values(events).some((e: any) => e.type === 'slayer_shot' && e.actorUid === user.uid && e.status === 'pending');
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 w-full max-w-7xl mx-auto animate-fade-in pb-20 px-0 sm:px-4">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full max-w-7xl mx-auto animate-fade-in pb-20 px-0 sm:px-4">
       
       {/* Left Column: Board & Identity & Actions */}
       <div className="flex flex-col gap-6">
