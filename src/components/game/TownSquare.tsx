@@ -362,10 +362,13 @@ export function TownSquare() {
       <div className="mb-6 flex flex-wrap gap-4 items-center justify-between w-full px-4">
         <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.4em] font-serif shrink-0">Town Square</h3>
         <div className="flex gap-2 sm:gap-3 items-center ml-auto">
-           <div className="flex bg-slate-900 rounded-full border border-slate-700 p-0.5 shadow-inner">
-             <button onClick={() => setZoomLevel(p => Math.max(0.6, p - 0.2))} className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" aria-label="축소">-</button>
-             <button onClick={() => setZoomLevel(1)} className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-colors text-xs font-bold font-mono">1X</button>
-             <button onClick={() => setZoomLevel(p => Math.min(2.0, p + 0.2))} className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" aria-label="확대">+</button>
+           <div className="flex bg-slate-900 rounded-full border border-slate-700 p-1 shadow-inner gap-1">
+             <button onClick={() => setZoomLevel(p => Math.max(0.6, p - 0.2))} className="w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" aria-label="축소">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+             </button>
+             <button onClick={() => setZoomLevel(p => Math.min(2.0, p + 0.2))} className="w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-colors" aria-label="확대">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+             </button>
            </div>
            <button 
              onClick={() => setIsHelpOpen(true)}
