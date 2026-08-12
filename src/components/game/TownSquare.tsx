@@ -1,5 +1,6 @@
 import { useState, useMemo, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { useGameStore } from '../../store/gameStore';
 import { useSecretData, usePlayerSecretData } from '../../hooks/useFirebaseSync';
 import { cn } from '../../lib/utils/cn';
@@ -456,42 +457,53 @@ export function TownSquare() {
         )}
       </AnimatePresence>
 
-      <div className="w-full overflow-x-auto pb-6 custom-scrollbar px-2 -mx-2 flex justify-center">
-         <div className={cn(
-            "relative bg-slate-900/10 rounded-full border border-slate-800/30 flex items-center justify-center flex-shrink-0 transition-all",
-            players.length > 10 ? "w-[440px] h-[440px]" : "w-[360px] h-[360px]"
-         )}>
-           {role === 'st' && !isVoting && (
-             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none z-10 animate-fade-in">
-                <p className="text-xs font-black uppercase tracking-widest text-slate-600 mb-1">
-                  {selectedNominator ? "지목할 대상을 클릭하세요" : "지목자를 클릭하세요"}
-                </p>
-                <div className="flex justify-center gap-1">
-                   <div className={cn("w-1.5 h-1.5 rounded-full transition-colors", selectedNominator ? "bg-sky-500" : "bg-sky-500 animate-pulse")}></div>
-                   <div className={cn("w-1.5 h-1.5 rounded-full transition-colors", selectedNominator ? "bg-rose-500 animate-pulse" : "bg-slate-800")}></div>
-                </div>
-             </div>
-           )}
+      <div className="w-full pb-6 flex justify-center overflow-hidden touch-none">
+        <TransformWrapper
+          initialScale={1}
+          minScale={0.5}
+          maxScale={2}
+          centerOnInit={true}
+          wheel={{ step: 0.1 }}
+          pinch={{ step: 5 }}
+        >
+          <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
+             <div className={cn(
+                "relative bg-slate-900/10 rounded-full border border-slate-800/30 flex items-center justify-center flex-shrink-0 transition-all",
+                players.length > 10 ? "w-[440px] h-[440px]" : "w-[360px] h-[360px]"
+             )}>
+               {role === 'st' && !isVoting && (
+                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none z-10 animate-fade-in">
+                    <p className="text-xs font-black uppercase tracking-widest text-slate-600 mb-1">
+                      {selectedNominator ? "지목할 대상을 클릭하세요" : "지목자를 클릭하세요"}
+                    </p>
+                    <div className="flex justify-center gap-1">
+                       <div className={cn("w-1.5 h-1.5 rounded-full transition-colors", selectedNominator ? "bg-sky-500" : "bg-sky-500 animate-pulse")}></div>
+                       <div className={cn("w-1.5 h-1.5 rounded-full transition-colors", selectedNominator ? "bg-rose-500 animate-pulse" : "bg-slate-800")}></div>
+                    </div>
+                 </div>
+               )}
 
-           <div className="w-24 h-28 bg-slate-950 rounded-[40%] blur-3xl opacity-50 absolute pointer-events-none"></div>
-           
-           {players.map((p, i) => (
-             <PlayerToken
-               key={p.uid}
-               player={p}
-               index={i}
-               total={players.length}
-               secret={secretState?.players[p.uid]}
-               showFullInfo={showFullInfo}
-               selectedNominator={selectedNominator}
-               onClick={handlePlayerClick}
-               isVoting={isVoting}
-               role={role}
-               isNominated={currentTargetUid === p.uid}
-               hasVotedYes={currentVoterUids.includes(p.uid)}
-             />
-           ))}
-         </div>
+               <div className="w-24 h-28 bg-slate-950 rounded-[40%] blur-3xl opacity-50 absolute pointer-events-none"></div>
+               
+               {players.map((p, i) => (
+                 <PlayerToken
+                   key={p.uid}
+                   player={p}
+                   index={i}
+                   total={players.length}
+                   secret={secretState?.players[p.uid]}
+                   showFullInfo={showFullInfo}
+                   selectedNominator={selectedNominator}
+                   onClick={handlePlayerClick}
+                   isVoting={isVoting}
+                   role={role}
+                   isNominated={currentTargetUid === p.uid}
+                   hasVotedYes={currentVoterUids.includes(p.uid)}
+                 />
+               ))}
+             </div>
+          </TransformComponent>
+        </TransformWrapper>
       </div>
     </div>
   );

@@ -201,7 +201,7 @@ function App() {
             {user && role === 'player' && roomState && (roomState?.status === 'lobby' || roomState?.status === 'setup') && <PlayerLobby />}
             
             <Suspense fallback={<LoadingSpinner />}>
-              <div className="w-full">
+              <div className="w-full flex flex-col items-center">
                  {user && role && isDayPhase && <DayPhase isST={role === 'st'} />}
                  {user && role && isNightPhase && <NightPhase isST={role === 'st'} />}
               </div>
