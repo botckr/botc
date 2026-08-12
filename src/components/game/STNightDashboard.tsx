@@ -264,7 +264,7 @@ export function STNightDashboard() {
       <section className="bg-slate-900/90 p-8 rounded-[2.5rem] border border-slate-800 shadow-2xl relative overflow-hidden">
          <div className="absolute top-0 right-0 w-32 h-32 bg-sky-500/5 blur-3xl pointer-events-none"></div>
          <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.4em] mb-8 border-b border-slate-800/50 pb-4">실시간 밤 행동 요약</h3>
-         <div className="grid grid-cols-1 gap-4">
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {players.filter(p => !p.isDead).map(p => {
                const action = actions[p.uid];
                const role = secretState.players[p.uid]?.character;
@@ -356,7 +356,7 @@ export function STNightDashboard() {
             </button>
          </div>
          
-         <div className="space-y-8 pr-3">
+         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {players.map(p => {
                const secret = secretState.players[p.uid];
                return (
