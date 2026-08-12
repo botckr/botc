@@ -23,10 +23,8 @@ export function DayPhase({ isST }: { isST: boolean }) {
     handleCancelNomination,
     handleVote,
     endVoting,
-    executeAndTransition,
     finalizeDay,
     handleSlayerShot,
-    pendingMayorExecution,
     majorityNeeded,
     yesCount
   } = useVotingLogic(roomId, roomState, secretState, user, isST, playerSecret);
@@ -229,56 +227,6 @@ export function DayPhase({ isST }: { isST: boolean }) {
          )}
       </div>
 
-
-
-      {isST && pendingMayorExecution && (
-         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-            <div className="bg-slate-900 border border-slate-700 p-6 sm:p-8 rounded-3xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-               <h3 className="text-xl font-black text-amber-500 uppercase tracking-widest mb-2">시장 처형 대체 선택</h3>
-               <p className="text-sm text-slate-300 mb-6 leading-relaxed">
-                  처형 대상이 시장(<span className="font-bold text-amber-400">{roomState.players[pendingMayorExecution.targetUid]?.name}</span>)입니다.<br/>
-                  시장의 능력으로 다른 플레이어를 대신 처형하거나 아무도 죽지 않게 할 수 있습니다. 
-                  대신 죽을 사람을 아래에서 선택해 주세요.
-               </p>
-               
-               <div className="flex flex-col gap-3">
-                  <Button 
-                     onClick={() => executeAndTransition(null)} 
-                     variant="secondary" 
-                     className="w-full text-emerald-400 border-emerald-500/30 bg-emerald-950/20 hover:bg-emerald-900/40 font-black h-14"
-                  >
-                     아무도 처형하지 않음 (생존)
-                  </Button>
-                  
-                  <div className="h-px w-full bg-slate-800 my-2"></div>
-                  
-                  <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mb-1">대체 처형 대상 (생존자 목록)</p>
-                  <div className="grid grid-cols-2 gap-2">
-                     {Object.values(roomState.players).filter((p: any) => !p.isDead && p.uid !== pendingMayorExecution.targetUid).map((p: any) => (
-                        <Button 
-                           key={p.uid}
-                           onClick={() => executeAndTransition(p.uid)}
-                           variant="danger"
-                           className="font-bold uppercase tracking-widest h-12"
-                        >
-                           {p.name} 처형
-                        </Button>
-                     ))}
-                  </div>
-
-                  <div className="h-px w-full bg-slate-800 my-2"></div>
-
-                  <Button 
-                     onClick={() => executeAndTransition(pendingMayorExecution.targetUid)} 
-                     variant="ghost" 
-                     className="w-full text-rose-500 border-rose-500/30 hover:bg-rose-950/40 font-black h-14 uppercase tracking-widest"
-                  >
-                     시장 본인 처형
-                  </Button>
-               </div>
-            </div>
-         </div>
-      )}
     </div>
   );
 }

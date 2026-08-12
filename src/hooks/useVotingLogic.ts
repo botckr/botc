@@ -1,4 +1,4 @@
-import { useState } from 'react';
+
 import { database } from '../lib/firebase';
 import { ref, update, get } from 'firebase/database';
 import { handleDemonDeath, checkWinCondition } from '../lib/gameLogic';
@@ -11,7 +11,7 @@ export function useVotingLogic(
   isST: boolean,
   playerSecret: any
 ) {
-  const [pendingMayorExecution, setPendingMayorExecution] = useState<{ targetUid: string } | null>(null);
+
 
   const players = roomState?.players ? Object.values(roomState.players).sort((a: any, b: any) => a.seatIndex - b.seatIndex) : [];
   const alivePlayers = players.filter((p: any) => !p.isDead);
@@ -345,19 +345,11 @@ export function useVotingLogic(
 
     updates[`secret/rooms/${roomId}`] = secClone;
     await update(ref(database), updates);
-    setPendingMayorExecution(null);
   };
 
   const finalizeDay = async () => {
     if (!isST || !secretState || !roomState) return;
     const targetUid = roomState.executionTargetUid || null;
-    const targetSecret = targetUid ? secretState.players[targetUid] : null;
-
-    if (targetUid && targetSecret?.character === 'mayor' && !targetSecret.isPoisoned && !targetSecret.isDrunk) {
-       setPendingMayorExecution({ targetUid });
-       return;
-    }
-    
     executeAndTransition(targetUid);
   };
 
@@ -408,8 +400,6 @@ export function useVotingLogic(
     executeAndTransition,
     finalizeDay,
     handleSlayerShot,
-    pendingMayorExecution,
-    setPendingMayorExecution,
     majorityNeeded,
     yesCount,
   };
