@@ -80,7 +80,12 @@ function App() {
       });
 
       updates[`public/rooms/${roomId}`] = pubClone;
-      updates[`secret/rooms/${roomId}`] = null; 
+      updates[`secret/rooms/${roomId}`] = {
+        stUid: (roomState as any).stUid || user?.uid,
+        players: {},
+        nightActions: {},
+        nightResults: {}
+      }; 
       
       await update(ref(database), updates);
     }
