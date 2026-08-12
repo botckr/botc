@@ -387,6 +387,13 @@ export function STNightDashboard() {
                           <p className="text-[10px] text-amber-400 font-bold leading-relaxed">⚠️ {suggestionWarnings[p.uid]}</p>
                        </div>
                     )}
+                    {actions[p.uid] && (
+                       <div className="bg-emerald-950/20 border border-emerald-900/30 p-2.5 rounded-xl mb-2">
+                          <p className="text-xs text-emerald-400 font-bold">
+                             👉 지목 대상: <span className="text-white">{[actions[p.uid].targetUid, actions[p.uid].target2Uid].filter(Boolean).map(uid => roomState.players[uid as string]?.name || '알 수 없음').join(', ') || '지목 안함 (확인 완료)'}</span>
+                          </p>
+                       </div>
+                    )}
                     <textarea
                       placeholder={`${p.name}님에게 전달할 비밀 정보를 입력하세요...`}
                       value={editedSuggestions[p.uid] || ''}
